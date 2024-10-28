@@ -9,14 +9,14 @@
 *   / / / / / / / __ \/ __ `/ __ `__ \/ / ___/                                     *
 *  / /_/ / /_/ / / / / /_/ / / / / / / / /__                                       *
 * /_____/\__, /_/ /_/\__,_/_/ /_/ /_/_/\___/                                       *
-*    ___/____/   __  _           _                          ____   ___  ______     *
-*   / __ \____  / /_(_)___ ___  (_)___  ___  _____  _   __ / __ \ <  / / ____/     *
-*  / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/ | | / // / / / / / /___ \       *
-* / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /     | |/ // /_/ / / / ____/ /       *
-* \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/      |___(_)____(_)_(_)_____/        *
+*    ___/____/   __  _           _                          ____   ___    ____     *
+*   / __ \____  / /_(_)___ ___  (_)___  ___  _____  _   __ / __ \ |__ \  / __ \    *
+*  / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/ | | / // / / / __/ / / / / /    *
+* / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /     | |/ // /_/ / / __/_/ /_/ /     *
+* \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/      |___(_)____(_)____(_)____/      *
 *     /_/                                                                          *
 *                                                                                  *
-* This is GDOPT - General Dynamic Optimizer v.0.1.5, a framework for solving       *
+* This is GDOPT - General Dynamic Optimizer v.0.2.0, a framework for solving       *
 * "General Dynamic Optimization Problems" using local collocation methods, based   *
 * on RadauIIA formulas, and adaptive mesh refinement techniques. GDOPT utilizes    *
 * the capabilities of the nonlinear optimizer IPOPT for solving the resulting      *

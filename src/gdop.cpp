@@ -651,10 +651,10 @@ bool GDOP::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g) {
                 for (int k = 0; k < rk.steps; k++) {
                     const int xik = i * offXUBlock + k * offXU;  // first index (dim=0) of x_{ik}
                     if (i == 0) {
-                        rkLinearComb += rk.Ainv[j][k] * (x[xik + d] - problem->x0[d]);
+                        rkLinearComb += rk.derMat[j + 1][k + 1] * (x[xik + d] - problem->x0[d]);
                     }
                     else {
-                        rkLinearComb += rk.Ainv[j][k] * (x[xik + d] - x[xi1_m + d]);
+                        rkLinearComb += rk.derMat[j + 1][k + 1] * (x[xik + d] - x[xi1_m + d]);
                     }
                 }
                 g[eq] = rkLinearComb - mesh.deltaT[i] * problem->F[d]->eval(&x[xij], &x[uij], &x[offXUTotal], tij);
@@ -814,13 +814,13 @@ void GDOP::get_jac_values(const Number* x, Number* values) {
             for (int d = 0; d < sz(problem->F); d++) {
                 // sum_k ~a_{jk} * (-x_{i-1,m}), i>=1
                 if (i > 0) {
-                    values[idxCOO] = -rk.invRowSum[j];
+                    values[idxCOO] = rk.derMat[j + 1][0];
                     idxCOO++;
                 }
 
                 // sum_k ~a_{jk} * (x_{i,k})
                 for (int k = 0; k < rk.steps; k++) {
-                    values[idxCOO] = rk.Ainv[j][k];
+                    values[idxCOO] = rk.derMat[j + 1][k + 1];
                     if (k == j) {
                         containedIndex = idxCOO;
                     }

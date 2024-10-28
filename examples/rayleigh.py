@@ -16,13 +16,14 @@ model.generate()
 
 model.optimize(
     tf=4.5,
-    steps=50,
-    rksteps=3,
-    flags={"linearSolver": LinearSolver.MA57},
+    steps=1,
+    rksteps=70,
+    flags={
+        "linearSolver": LinearSolver.MA57,
+        "initVars": InitVars.SOLVE_EXPLICIT_EULER,
+    },
     meshFlags={
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
-        "refinementMethod": RefinementMethod.LINEAR_SPLINE,
-        "iterations": 5,
     },
 )
 

@@ -34,25 +34,24 @@
     1 add, construct, test more mesh refinement algorithms!              5, 4
     2 OpenModelica interface                                             4, 5
     3 test framework for huge examples / industry relevant               3, 2
-    4 play with setting in ipopt / pivoting etc. -> basically done       2, 3
-    5 check long double to double cast in evals, refactor to typedef     2, 2
+    4 check long double to double cast in evals, refactor to typedef     2, 2
       e.g. GNumber, which is long (double) -> cast to double for ipopt
 
     delayed:
-    6 tf as free variable                                                2, 4.5
-    7 vectorized equation, derivatives with local substitutions          2, 4
+    5 tf as free variable                                                2, 4.5
+    6 vectorized equation, derivatives with local substitutions          2, 4
     -> define vec(f,g), vec(r), vec(a(p)) : faster compilation, since
        less classes are generated or does it not matter?
-    8 better initial guess: evolutionary algorithms                      1, 3
-    9 detection for nominal, linear, quadratic, const hessian            1, 2
-    10 constructing a p / hp-method?                                     3, 5
+    7 better initial guess: evolutionary algorithms, high deg poly       2, 3
+    -> use a bdf method and interpolate the discrete state values
+    8 detection for nominal, linear, quadratic, const hessian            1, 2
+    9 constructing a p / hp-method?                                      5, 5
 
     others:
-    11 plotting features for path constraints, lagrange terms            1, 1
-    12 splitting const jacobian equality / inequality                    1, 1
-    13 use argc, argv                                                    1, 1
-    14 better memory management, not always vector.push_back             2, 1
-    15 intergrator refactor
+    10 plotting features for path constraints, lagrange terms            1, 1
+    11 splitting const jacobian equality / inequality                    1, 1
+    12 use argc, argv                                                    1, 1
+    13 better memory management, not always vector.push_back             2, 1
 */
 
 struct SolverPrivate {
@@ -675,14 +674,14 @@ void Solver::printASCIIArt() const {
 *   / / / / / / / __ \/ __ `/ __ `__ \/ / ___/                                     *
 *  / /_/ / /_/ / / / / /_/ / / / / / / / /__                                       *
 * /_____/\__, /_/ /_/\__,_/_/ /_/ /_/_/\___/                                       *
-*    ___/____/   __  _           _                          ____   ___  ______     *
-*   / __ \____  / /_(_)___ ___  (_)___  ___  _____  _   __ / __ \ <  / / ____/     *
-*  / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/ | | / // / / / / / /___ \       *
-* / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /     | |/ // /_/ / / / ____/ /       *
-* \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/      |___(_)____(_)_(_)_____/        *
+*    ___/____/   __  _           _                          ____   ___    ____     *
+*   / __ \____  / /_(_)___ ___  (_)___  ___  _____  _   __ / __ \ |__ \  / __ \    *
+*  / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/ | | / // / / / __/ / / / / /    *
+* / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /     | |/ // /_/ / / __/_/ /_/ /     *
+* \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/      |___(_)____(_)____(_)____/      *
 *     /_/                                                                          *
 *                                                                                  *
-* This is GDOPT - General Dynamic Optimizer v.0.1.5, a framework for solving       *
+* This is GDOPT - General Dynamic Optimizer v.0.2.0, a framework for solving       *
 * "General Dynamic Optimization Problems" using local collocation methods, based   *
 * on RadauIIA formulas, and adaptive mesh refinement techniques. GDOPT utilizes    *
 * the capabilities of the nonlinear optimizer IPOPT for solving the resulting      *
