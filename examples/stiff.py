@@ -7,10 +7,9 @@ y = model.addState(start=1)
 
 u = model.addInput(lb=0, ub=1)
 
-# TODO: fix me! This runtime parameter doesnt work properly somehow.
-# maxStiffness = model.addRuntimeParameter(default=5.5, symbol="maxStiffness")
+maxStiffness = model.addRuntimeParameter(default=0, symbol="maxStiffness")
 
-stiffness = model.addParameter(lb=-250, ub=-11.5)
+stiffness = model.addParameter(lb=-250, ub=maxStiffness)
 
 model.addDynamic(x, stiffness * (x + y * cos(t)) + u)
 model.addDynamic(y, x * exp(u) / (u**2 + 1))
@@ -26,5 +25,8 @@ model.optimize(
     flags={"linearSolver": LinearSolver.MUMPS, "initVars": InitVars.SOLVE},
     meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 5},
 )
+
+model.setValue(maxStiffness, -10)
+model.solve(resimulate=True)
 
 model.plotVarsAndRefinement(dotsMesh=Dots.BASE)

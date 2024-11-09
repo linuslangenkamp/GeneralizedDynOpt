@@ -17,6 +17,9 @@
 ###############################################################################
 
 
+# TODO: refactor this, set id_counter to length of list<var> in model, e.g. id=len(self.xVars), ...
+
+
 class VariableStruct:
     id_counter = 0
 
@@ -32,7 +35,9 @@ class VariableStruct:
 class StateStruct(VariableStruct):
     id_counter = 0
 
-    def __init__(self, start, symbol=None, lb=-float("inf"), ub=float("inf"), nominal=None):
+    def __init__(
+        self, start, symbol=None, lb=-float("inf"), ub=float("inf"), nominal=None
+    ):
         super().__init__(symbol, lb, ub, nominal=nominal)
         self.start = start
         self.symbol = symbol if symbol is not None else f"x[{StateStruct.id_counter}]"
@@ -43,7 +48,14 @@ class StateStruct(VariableStruct):
 class InputStruct(VariableStruct):
     id_counter = 0
 
-    def __init__(self, symbol=None, lb=-float("inf"), ub=float("inf"), initialGuess=0, nominal=None):
+    def __init__(
+        self,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        initialGuess=0,
+        nominal=None,
+    ):
         super().__init__(symbol, lb, ub, nominal=nominal)
         self.initialGuess = initialGuess
         self.symbol = symbol if symbol is not None else f"u[{InputStruct.id_counter}]"
@@ -54,10 +66,19 @@ class InputStruct(VariableStruct):
 class ParameterStruct(VariableStruct):
     id_counter = 0
 
-    def __init__(self, symbol=None, lb=-float("inf"), ub=float("inf"), initialGuess=0, nominal=None):
+    def __init__(
+        self,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        initialGuess=0,
+        nominal=None,
+    ):
         super().__init__(symbol, lb, ub, nominal=nominal)
         self.initialGuess = initialGuess
-        self.symbol = symbol if symbol is not None else f"p[{ParameterStruct.id_counter}]"
+        self.symbol = (
+            symbol if symbol is not None else f"p[{ParameterStruct.id_counter}]"
+        )
         self.id = ParameterStruct.id_counter
         ParameterStruct.id_counter += 1
 
@@ -67,10 +88,12 @@ class RuntimeParameterStruct(VariableStruct):
 
     def __init__(self, default, symbol=None, lb=-float("inf"), ub=float("inf")):
         super().__init__(symbol, lb, ub)
-        self.symbol = symbol if symbol is not None else f"rp_{ParameterStruct.id_counter}"
-        self.id = ParameterStruct.id_counter
+        self.symbol = (
+            symbol if symbol is not None else f"rp_{RuntimeParameterStruct.id_counter}"
+        )
+        self.id = RuntimeParameterStruct.id_counter
         self.value = default
-        ParameterStruct.id_counter += 1
+        RuntimeParameterStruct.id_counter += 1
 
 
 class_order = {"State": 0, "Input": 1, "Parameter": 2}
