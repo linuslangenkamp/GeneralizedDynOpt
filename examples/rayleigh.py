@@ -2,8 +2,8 @@ from gdopt import *
 
 model = Model("rayleigh")
 
-x = model.addState(start=-5)
-y = model.addState(start=-5)
+x = model.addState(start=-5, symbol="x")
+y = model.addState(start=-5, symbol="y")
 
 u = model.addInput()
 
@@ -20,11 +20,13 @@ model.optimize(
     rksteps=70,
     flags={
         "linearSolver": LinearSolver.MA57,
-        "initVars": InitVars.SOLVE_EXPLICIT_EULER,
+        "initVars": InitVars.SOLVE_EXPLICIT,
+        "exportJacobianPath": "/tmp",
     },
     meshFlags={
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
     },
 )
 
-model.plot(dots=Dots.BASE)
+model.plot(dots=Dots.ALL, specifCols=["x"])
+model.plotSparseMatrix(MatrixType.JACOBIAN)

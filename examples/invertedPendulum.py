@@ -17,7 +17,9 @@ omega = model.addState(start=0)
 
 u = model.addInput(lb=-15, ub=15, guess=0.1 * t)
 
-dvdt = u + (sin(-phi) * Mp * R * omega**2 - cos(phi) * sin(-phi) * Mp * G) / (Ms + Mp * sin(-phi) ** 2)
+dvdt = u + (sin(-phi) * Mp * R * omega**2 - cos(phi) * sin(-phi) * Mp * G) / (
+    Ms + Mp * sin(-phi) ** 2
+)
 
 model.addDynamic(s, v)
 model.addDynamic(v, dvdt)

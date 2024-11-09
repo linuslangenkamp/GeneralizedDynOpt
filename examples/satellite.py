@@ -36,7 +36,13 @@ model.addDynamic(x6, ((I3 - I1) * x7 * x5 + T2S * u2) / I2)
 model.addDynamic(x7, ((I1 - I2) * x5 * x6 + T3S * u3) / I3)
 
 model.addMayer(
-    (x1 - M1) ** 2 + (x2 - M2) ** 2 + (x3 - M3) ** 2 + (x4 - M4) ** 2 + x5**2 + x6**2 + x7**2,
+    (x1 - M1) ** 2
+    + (x2 - M2) ** 2
+    + (x3 - M3) ** 2
+    + (x4 - M4) ** 2
+    + x5**2
+    + x6**2
+    + x7**2,
     Objective.MINIMIZE,
 )
 

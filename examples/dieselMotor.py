@@ -79,7 +79,9 @@ w_tc = model.addState(
     symbol="w_tc",
 )
 
-u_f = model.addInput(lb=0, ub=250 / control_norm1, symbol="u_f", guess=25 / control_norm1)
+u_f = model.addInput(
+    lb=0, ub=250 / control_norm1, symbol="u_f", guess=25 / control_norm1
+)
 u_wg = model.addInput(lb=0, ub=1, symbol="u_wg", guess=0.1)
 
 W_ICE = state_norm1 * w_ice
@@ -90,7 +92,9 @@ U_F = control_norm1 * u_f
 
 Pi_c = P_IM / p_amb
 w_tc_corr = state_norm4 * w_tc / sqrt(T_amb / T_amb)
-Pi_c_max = ((((w_tc_corr**2) * (R_c**2) * Psi_max) / (2 * cp_a * T_amb)) + 1) ** (gamma_a / (gamma_a - 1))
+Pi_c_max = ((((w_tc_corr**2) * (R_c**2) * Psi_max) / (2 * cp_a * T_amb)) + 1) ** (
+    gamma_a / (gamma_a - 1)
+)
 Cm_temp = 1 - ((Pi_c / Pi_c_max) ** 2)
 dot_m_c = (dot_m_c_corr_max * sqrt(Cm_temp)) * (p_amb / p_amb) / sqrt(T_amb / T_amb)
 P_c = dot_m_c * cp_a * T_amb * ((Pi_c ** ((gamma_a - 1) / gamma_a)) - 1) / eta_c
@@ -103,7 +107,13 @@ eta_ig = eta_igch * (1 - (1 / (r_c ** (gamma_cyl - 1))))
 T_pump = V_D * (P_EM - P_IM)
 T_ig = n_cyl * Hlhv * eta_ig * u_f * control_norm1 * 1e-6
 T_fric = (
-    V_D * (10**5) * (c_fr1 * ((W_ICE * 60 / (2 * pi * 1000)) ** 2) + c_fr2 * (W_ICE * 60 / (2 * pi * 1000)) + c_fr3)
+    V_D
+    * (10**5)
+    * (
+        c_fr1 * ((W_ICE * 60 / (2 * pi * 1000)) ** 2)
+        + c_fr2 * (W_ICE * 60 / (2 * pi * 1000))
+        + c_fr3
+    )
 )
 T_ice = (T_ig - T_fric - T_pump) / (4 * pi)
 
@@ -121,21 +131,40 @@ T_eo = (
 Pi_t = p_es / P_EM
 Pi_ts_low = (2 / (gamma_e + 1)) ** (gamma_e / (gamma_e - 1))
 Pi_ts = sqrt(Pi_t)
-Psi_t = sqrt((2 * gamma_e / (gamma_e - 1)) * ((Pi_ts ** (2 / gamma_e)) - (Pi_ts ** ((gamma_e + 1) / gamma_e))))
+Psi_t = sqrt(
+    (2 * gamma_e / (gamma_e - 1))
+    * ((Pi_ts ** (2 / gamma_e)) - (Pi_ts ** ((gamma_e + 1) / gamma_e)))
+)
 dot_m_t = P_EM * Psi_t * A_t_eff / (sqrt(T_eo * R_e))
 
 P_t = dot_m_t * cp_e * T_eo * eta_t * (1 - (Pi_t ** ((gamma_e - 1) / gamma_e)))
 
 Pi_wg = p_amb / P_EM
 Pi_wgs = Pi_wg
-Psi_wg = sqrt(2 * gamma_e / (gamma_e - 1) * ((Pi_wgs ** (2 / gamma_e)) - (Pi_wgs ** ((gamma_e + 1) / gamma_e))))
+Psi_wg = sqrt(
+    2
+    * gamma_e
+    / (gamma_e - 1)
+    * ((Pi_wgs ** (2 / gamma_e)) - (Pi_wgs ** ((gamma_e + 1) / gamma_e)))
+)
 dot_m_wg = P_EM * Psi_wg * A_wg_eff * u_wg / (sqrt(T_eo * R_e))
 P_ICE = T_ice * W_ICE / control_norm3
 
 model.addDynamic(w_ice, 0.0012987012987013 * T_ice)
-model.addDynamic(p_im, 20.2505119361145 * ((0.526906365590249 * sqrt(Cm_temp)) - dot_m_ci))
-model.addDynamic(p_em, 0.0476078551344513 * (T_eo * (dot_m_ci + dot_m_f - dot_m_t - dot_m_wg)))
-model.addDynamic(w_tc, 0.0001 * ((P_t - P_c) / (0.000197779559297041 * W_TC) - 2.47230109968751e-005 * W_TC * W_TC))
+model.addDynamic(
+    p_im, 20.2505119361145 * ((0.526906365590249 * sqrt(Cm_temp)) - dot_m_ci)
+)
+model.addDynamic(
+    p_em, 0.0476078551344513 * (T_eo * (dot_m_ci + dot_m_f - dot_m_t - dot_m_wg))
+)
+model.addDynamic(
+    w_tc,
+    0.0001
+    * (
+        (P_t - P_c) / (0.000197779559297041 * W_TC)
+        - 2.47230109968751e-005 * W_TC * W_TC
+    ),
+)
 
 model.addMayer(
     (w_ice - 0.515309170685596) ** 2
@@ -148,8 +177,8 @@ model.addLagrange(dot_m_f)
 model.generate()
 
 model.optimize(
-    steps=250,
-    rksteps=3,
+    steps=75,
+    rksteps=5,
     tf=0.5,
     flags={
         "linearSolver": LinearSolver.MUMPS,

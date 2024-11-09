@@ -29,7 +29,11 @@ model.optimize(
     tf=2,
     steps=10,
     rksteps=3,
-    flags={"linearSolver": LinearSolver.MUMPS, "initVars": InitVars.SOLVE, "ipoptPrintLevel": 0},
+    flags={
+        "linearSolver": LinearSolver.MUMPS,
+        "initVars": InitVars.SOLVE,
+        "ipoptPrintLevel": 0,
+    },
     meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 6},
 )
 

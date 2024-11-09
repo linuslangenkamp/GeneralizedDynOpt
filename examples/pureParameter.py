@@ -19,7 +19,9 @@ model.addMayer(sum(Values[i] * P[i] for i in range(Items)), Objective.MAXIMIZE)
 
 model.generate()
 
-model.optimize(flags={"linearSolver": LinearSolver.MA57, "tolerance": 1e-14}, meshFlags={})
+model.optimize(
+    flags={"linearSolver": LinearSolver.MA57, "tolerance": 1e-14}, meshFlags={}
+)
 
 model.printResultParameters()
 weights = 0

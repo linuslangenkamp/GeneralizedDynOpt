@@ -5,7 +5,9 @@ from gdopt import *
 hw = Model("Hello World")
 
 x = hw.addState(start=0)
-u = hw.addControl(lb=0, ub=2, guess=(-2 + 2 * sqrt(exp(1))) / (1 + (-1 + sqrt(exp(1))) * t))
+u = hw.addControl(
+    lb=0, ub=2, guess=(-2 + 2 * sqrt(exp(1))) / (1 + (-1 + sqrt(exp(1))) * t)
+)
 
 hw.addDynamic(x, 2 * t - u)
 

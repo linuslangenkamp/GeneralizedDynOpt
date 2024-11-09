@@ -25,7 +25,11 @@ model.optimize(
     tf=1,
     steps=500,
     rksteps=3,
-    flags={"linearSolver": LinearSolver.MA57, "initVars": InitVars.SOLVE, "tolerance": 1e-14},
+    flags={
+        "linearSolver": LinearSolver.MA57,
+        "initVars": InitVars.SOLVE,
+        "tolerance": 1e-14,
+    },
 )
 
 model.setValue(NOM_SCALED, 1e10)
