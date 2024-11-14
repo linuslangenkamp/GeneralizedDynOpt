@@ -23,10 +23,12 @@ model.optimize(
     steps=100,
     rksteps=5,
     flags={"linearSolver": LinearSolver.MUMPS, "initVars": InitVars.SOLVE},
-    meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 5},
+    meshFlags={
+        "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
+        "iterations": 5,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-14,
+    },
 )
-
-model.setValue(maxStiffness, -10)
-model.solve(resimulate=True)
 
 model.plotVarsAndRefinement(dotsMesh=Dots.BASE)

@@ -190,6 +190,8 @@ model.optimize(
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
         "iterations": 5,
         "refinementMethod": RefinementMethod.LINEAR_SPLINE,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-14,
     },
 )
 

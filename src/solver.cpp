@@ -32,7 +32,7 @@
 
     main todos:
     1 add, construct, test more mesh refinement algorithms!              5, 4
-    2 OpenModelica interface                                             4, 5
+    2 OpenModelica interface                                             5, 5
     3 test framework for huge examples / industry relevant               3, 2
     4 check long double to double cast in evals, refactor to typedef     2, 2
       e.g. GNumber, which is long (double) -> cast to double for ipopt
@@ -46,12 +46,13 @@
     -> use a bdf method and interpolate the discrete state values
     8 detection for nominal, linear, quadratic, const hessian            1, 2
     9 constructing a p / hp-method?                                      5, 5
+    10 add initial constraints -> x0 is variable aswell                  4, 3
 
     others:
-    10 plotting features for path constraints, lagrange terms            1, 1
-    11 splitting const jacobian equality / inequality                    1, 1
-    12 use argc, argv                                                    1, 1
-    13 better memory management, not always vector.push_back             2, 1
+    11 plotting features for path constraints, lagrange terms            1, 1
+    12 splitting const jacobian equality / inequality                    1, 1
+    13 use argc, argv                                                    1, 1
+    14 better memory management, not always vector.push_back             2, 1
 */
 
 struct SolverPrivate {
@@ -209,8 +210,8 @@ std::vector<int> Solver::L2BoundaryNorm() const {
 
             // values of the (1st, 2nd) diff of the interpolating polynomial at 0, c1, c2, ...
             std::vector<double> p_uDiff = _priv->gdop->rk.evalLagrangeDiff(uCoeffs);
+            // TODO: maybe remove 2nd diff matrix evalLagrangeDiff2(uCoeffs) <=> evalLagrangeDiff(p_UDiff), since D^{1}^2 = D^2
             std::vector<double> p_uDiff2 = _priv->gdop->rk.evalLagrangeDiff2(uCoeffs);
-
             // squared values of the (1st, 2nd) diff of the interpolating polynomial at c1, c2, ...
             std::vector<double> sq_p_uDiff;
             std::vector<double> sq_p_uDiff2;
@@ -591,11 +592,15 @@ void Solver::setSolverFlags(IpoptApplication& app) {
         // flags for the initial optimization
         app.Options()->SetNumericValue("bound_push", 1e-2);
         app.Options()->SetNumericValue("bound_frac", 1e-2);
+        app.Options()->SetStringValue("mu_strategy", MU_STRATEGY);
+        app.Options()->SetNumericValue("mu_init", MU_INIT);
     }
     else {
         // flags for every following refined optimization
         app.Options()->SetNumericValue("bound_push", 1e-4);
         app.Options()->SetNumericValue("bound_frac", 1e-4);
+        app.Options()->SetStringValue("mu_strategy", MU_STRATEGY_REFINEMENT);
+        app.Options()->SetNumericValue("mu_init", MU_INIT_REFINEMENT);
     }
 
     // setting the standard flags
@@ -608,7 +613,7 @@ void Solver::setStandardSolverFlags(IpoptApplication& app) {
     // mu-update strategy
     // turns out kkt-error adaptive_mu works really well for the provided examples (excluding poorly conditioned)
     // can be turned off with a flag
-    app.Options()->SetStringValue("mu_strategy", "adaptive");
+
     if (KKT_ERROR_MU_GLOBALIZATION) {
         app.Options()->SetStringValue("adaptive_mu_globalization", "kkt-error");
     }

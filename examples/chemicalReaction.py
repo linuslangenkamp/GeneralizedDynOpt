@@ -34,7 +34,12 @@ model.optimize(
         "initVars": InitVars.SOLVE,
         "ipoptPrintLevel": 0,
     },
-    meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 6},
+    meshFlags={
+        "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
+        "iterations": 6,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-15,
+    },
 )
 
 model.plot(dots=Dots.BASE)

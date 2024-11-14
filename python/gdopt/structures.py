@@ -81,3 +81,16 @@ class IVPSolver(Enum):
     DOP853 = 5
     RK23 = 6
     RADAU = Radau
+
+
+class MuStrategy(Enum):
+    ADAPTIVE = 1
+    MONOTONE = 2
+
+    def __str__(self):
+        if self == MuStrategy.ADAPTIVE:
+            return "adaptive"
+        elif self == MuStrategy.MONOTONE:
+            return "monotone"
+        else:
+            raise ValueError("Mu strategy must be MONOTONE or ADAPTIVE")

@@ -26,6 +26,10 @@ bool USER_SCALING = false;
 // ipopt flags
 int IPOPT_PRINT_LEVEL = 5;
 bool KKT_ERROR_MU_GLOBALIZATION = true;
+double MU_INIT = 0.1;                             // mu init, only has effect, if monotone is chosen - only first mesh iteration
+double MU_INIT_REFINEMENT = 0.1;                  // mu init, only has effect, if monotone is chosen - all mesh iterations
+std::string MU_STRATEGY = "adaptive";             // mu strategy - only first mesh iteration
+std::string MU_STRATEGY_REFINEMENT = "adaptive";  // mu strategy - all mesh iterations
 
 // mesh parameters
 double SIGMA = 2.5;  // basicStrategy: std deviation sigma
@@ -158,6 +162,20 @@ void setGlobalStandardConfiguration(const std::unordered_map<std::string, std::s
     // important ipopt flag, which is often benefitial, but terrible for poorly conditioned problems
     if ((configMap.find("KKT_ERROR_MU_GLOBALIZATION") != configMap.end())) {
         KKT_ERROR_MU_GLOBALIZATION = configMap.at("KKT_ERROR_MU_GLOBALIZATION") == "true";
+    }
+
+    // other ipopt flags
+    if ((configMap.find("MU_INIT") != configMap.end())) {
+        MU_INIT = std::stod(configMap.at("MU_INIT"));
+    }
+    if ((configMap.find("MU_INIT_REFINEMENT") != configMap.end())) {
+        MU_INIT_REFINEMENT = std::stod(configMap.at("MU_INIT_REFINEMENT"));
+    }
+    if ((configMap.find("MU_STRATEGY") != configMap.end())) {
+        MU_STRATEGY = configMap.at("MU_STRATEGY");
+    }
+    if ((configMap.find("MU_STRATEGY_REFINEMENT") != configMap.end())) {
+        MU_STRATEGY_REFINEMENT = configMap.at("MU_STRATEGY_REFINEMENT");
     }
 
     // optional output and dump flags

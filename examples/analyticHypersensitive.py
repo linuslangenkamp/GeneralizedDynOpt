@@ -34,7 +34,12 @@ model.optimize(
         "quadraticObjective": True,
         "linearConstraints": True,
     },
-    meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 20},
+    meshFlags={
+        "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
+        "iterations": 20,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-16,
+    },
 )
 
 model.plot(interval=[9980, 10000], dots=Dots.ALL)

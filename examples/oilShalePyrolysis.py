@@ -30,7 +30,12 @@ model.optimize(
     steps=500,
     rksteps=3,
     flags={"tolerance": 1e-15, "linearSolver": LinearSolver.MA57},
-    meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 5},
+    meshFlags={
+        "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
+        "iterations": 5,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-16,
+    },
 )
 
 model.plot(specifCols=["pyrolytic bitumen", "temperature"])

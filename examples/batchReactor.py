@@ -46,7 +46,12 @@ model.optimize(
     steps=250,
     rksteps=3,
     flags={"linearSolver": LinearSolver.MA57, "initVars": InitVars.SOLVE},
-    meshFlags={"algorithm": MeshAlgorithm.L2_BOUNDARY_NORM, "iterations": 6},
+    meshFlags={
+        "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
+        "iterations": 6,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-16,
+    },
 )
 
 # model.printResults()

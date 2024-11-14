@@ -25,6 +25,8 @@ model.optimize(
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
         "refinementMethod": RefinementMethod.LINEAR_SPLINE,
         "iterations": 20,
+        "muStrategyRefinement": MuStrategy.MONOTONE,
+        "muInitRefinement": 1e-12,
     },
 )
 

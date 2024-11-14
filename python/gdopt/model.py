@@ -58,6 +58,10 @@ class Model:
         self.maxIterations = 5000
         self.ipoptPrintLevel = None
         self.kktMuGlobalization = None
+        self.muInit = None
+        self.muInitRefinement = None
+        self.muStrategy = None
+        self.muStrategyRefinement = None
         self.ivpSolver = IVPSolver.RADAU
         self.initVars = InitVars.SOLVE
         self.refinementMethod = RefinementMethod.LINEAR_SPLINE
@@ -387,9 +391,11 @@ class Model:
                 + [u for u in self.uVars]
                 + [p for p in self.pVars]
                 + [rp for rp in self.rpVars],
-                dynEq.expr.subs(FINAL_TIME_SYMBOL, self.tf)
-                if hasattr(dynEq.expr, "subs")
-                else dynEq.expr,
+                (
+                    dynEq.expr.subs(FINAL_TIME_SYMBOL, self.tf)
+                    if hasattr(dynEq.expr, "subs")
+                    else dynEq.expr
+                ),
             )
             for dynEq in self.F
         ]
@@ -424,9 +430,11 @@ class Model:
         runtimeConstantsDict = {rpVar: varInfo[rpVar].value for rpVar in self.rpVars}
         runtimeConstantsDict[FINAL_TIME_SYMBOL] = self.tf
         x0 = [
-            varInfo[x].start.subs(runtimeConstantsDict)
-            if hasattr(varInfo[x].start, "subs")
-            else varInfo[x].start
+            (
+                varInfo[x].start.subs(runtimeConstantsDict)
+                if hasattr(varInfo[x].start, "subs")
+                else varInfo[x].start
+            )
             for x in self.xVars
         ]
         timeHorizon = [0, self.tf]
@@ -460,6 +468,18 @@ class Model:
 
     def setIpoptPrintLevel(self, printLevel: int):
         self.ipoptPrintLevel = printLevel
+
+    def setMuInit(self, muInit: float):
+        self.muInit = muInit
+
+    def setMuInitRefinement(self, muInitRefinement: float):
+        self.muInitRefinement = muInitRefinement
+
+    def setMuStrategy(self, muStrategy: str):
+        self.muStrategy = muStrategy
+
+    def setMuStrategyRefinement(self, muStrategyRefinement: str):
+        self.muStrategyRefinement = muStrategyRefinement
 
     def setOutputPath(self, path: str):
         self.outputFilePath = path
@@ -570,6 +590,10 @@ class Model:
             self.hasLinearConstraints(flags["linearConstraints"])
         if "kktMuGlobalization" in flags:
             self.setKKTMuGlobalization(flags["kktMuGlobalization"])
+        if "muStrategy" in flags:
+            self.setMuStrategy(flags["muStrategy"])
+        if "muInit" in flags:
+            self.setMuInit(flags["muInit"])
 
     def setMeshFlags(self, meshFlags):
         if "algorithm" in meshFlags:
@@ -584,6 +608,10 @@ class Model:
             self.setMeshCTol(meshFlags["cTol"])
         if "sigma" in meshFlags:
             self.setMeshSigma(meshFlags["sigma"])
+        if "muStrategyRefinement" in meshFlags:
+            self.setMuStrategyRefinement(meshFlags["muStrategyRefinement"])
+        if "muInitRefinement" in meshFlags:
+            self.setMuInitRefinement(meshFlags["muInitRefinement"])
 
     def uInitialGuessCodegen(self):
         out = "std::vector<double> initialGuessU(double t) {\n"
@@ -969,7 +997,9 @@ int main(int argc, char** argv) {{
         )
         with open(self.initialStatesPath + "/initialValues.csv", "w") as file:
             for i in range(len(timeVals)):
-                row = []  # could add timeColumn for debugging by adding: row = [str(timeVals[i])] -> change JUMP1 as well
+                row = (
+                    []
+                )  # could add timeColumn for debugging by adding: row = [str(timeVals[i])] -> change JUMP1 as well
                 for dim in range(len(self.xVars)):
                     row.append(str(stateVals[dim][i]))
 
@@ -1004,6 +1034,14 @@ int main(int argc, char** argv) {{
             OUTPUT += f"KKT_ERROR_MU_GLOBALIZATION {'true' if self.kktMuGlobalization else 'false'}\n"
         if self.ipoptPrintLevel is not None:
             OUTPUT += f"IPOPT_PRINT_LEVEL {self.ipoptPrintLevel}\n"
+        if self.muInit is not None:
+            OUTPUT += f"MU_INIT {self.muInit}\n"
+        if self.muStrategy is not None:
+            OUTPUT += f"MU_STRATEGY {self.muStrategy}\n"
+        if self.muInitRefinement is not None:
+            OUTPUT += f"MU_INIT_REFINEMENT {self.muInitRefinement}\n"
+        if self.muStrategyRefinement is not None:
+            OUTPUT += f"MU_STRATEGY_REFINEMENT {self.muStrategyRefinement}\n"
 
         OUTPUT += "\n[optionals: output]\n"
         if self.outputFilePath:

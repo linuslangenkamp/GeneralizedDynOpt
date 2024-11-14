@@ -24,6 +24,10 @@ extern double C_TOL;
 
 extern int IPOPT_PRINT_LEVEL;
 extern bool KKT_ERROR_MU_GLOBALIZATION;
+extern double MU_INIT;
+extern double MU_INIT_REFINEMENT;
+extern std::string MU_STRATEGY;
+extern std::string MU_STRATEGY_REFINEMENT;
 
 extern bool LINEAR_OBJECTIVE;
 extern bool LINEAR_CONSTRAINTS;
