@@ -511,6 +511,12 @@ bool GDOP::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Numb
 }
 
 bool GDOP::get_scaling_parameters(Number& obj_scaling, bool& use_x_scaling, Index n, Number* x_scaling, bool& use_g_scaling, Index m, Number* g_scaling) {
+    // DONT SCALE HERE, BUT RATHER AUTO SCALE OR BASED ON NOMINAL, BUT SCALE THE FUNCTIONS IN THE PROBLEM NOT THE CONSTRAINTS, SEE D X - DELTA T F = 0!!
+    // better in ipopt loop -> x = unscale(x_scaled) -> call f,g,r,... (x) -> f_scaled = scaled(f(x_unnom)), same for nabla f ...
+    // scaled(f) = 1/nominal(x) * f(x) = 1 / nominal(x) * f(nominal(x) * scaled(x)), with scaled(x) = x_NLP und * nom(f) = nom(xvar) zusätzlich?
+    // e.g. scaled(nabla^2 g) =
+    // note hessian is scaled proportional to nom(x) * nom(y)
+
     use_x_scaling = true;
     use_g_scaling = true;
 
@@ -540,6 +546,7 @@ bool GDOP::get_scaling_parameters(Number& obj_scaling, bool& use_x_scaling, Inde
     for (int i = 0; i < mesh.intervals; i++) {
         for (int j = 0; j < rk.steps; j++) {
             for (int d = 0; d < sz(problem->F); d++) {
+                // this is utter garbage. Assume f ~ 1e10 -> D_ij ~ 0 in scaled -> complete destruction!
                 g_scaling[eq] = checkNominalValue(problem->nominalsF[d]);
                 eq++;
             }
@@ -1010,11 +1017,11 @@ void GDOP::init_h_sparsity(Index* iRow, Index* jCol) {
     }
 }
 
-void GDOP::evalHessianA_B(Number* values, const Number* x, Expression& expr, const double factor, const int xij, const int uij, const double tij, const int i,
-                          const int j) {
+void GDOP::addHessianA_B_C(Number* values, const Number* x, Expression& expr, const double factor, const int xij, const int uij, const double tij, const int i,
+                           const int j) {
     auto const diff2Expr = expr.evalDiff2(&x[xij], &x[uij], &x[offXUTotal], tij);
 
-    // shifting needed for A and B COO indices!
+    // shifting needed for A and B but not C COO indices!
     for (int k = 0; k < sz(expr.adjDiff.indXX); k++) {
         auto const vars = expr.adjDiff.indXX[k];
         auto const idxCOO = lengthA * (i * rk.steps + j) + hessianA[vars];
@@ -1047,7 +1054,7 @@ void GDOP::evalHessianA_B(Number* values, const Number* x, Expression& expr, con
     }
 }
 
-void GDOP::evalHessianAt_Bt(Number* values, const Number* x, Expression& expr, const double factor, const int xij, const int uij, const double tij) {
+void GDOP::addHessianAt_Bt_C(Number* values, const Number* x, Expression& expr, const double factor, const int xij, const int uij, const double tij) {
     auto const diff2Expr = expr.evalDiff2(&x[xij], &x[uij], &x[offXUTotal], tij);
 
     // no shifting needed At, Bt and C have exact COO indices!
@@ -1077,7 +1084,7 @@ void GDOP::evalHessianAt_Bt(Number* values, const Number* x, Expression& expr, c
     }
 }
 
-void GDOP::evalHessianC(Number* values, const Number* x, ParamExpression& expr, double factor) {
+void GDOP::addHessianParametricEquations(Number* values, const Number* x, ParamExpression& expr, double factor) {
     auto const diff2Expr = expr.evalDiff2(&x[offXUTotal]);
     for (int k = 0; k < sz(expr.adjDiff.indPP); k++) {
         auto const vars = expr.adjDiff.indPP[k];
@@ -1096,20 +1103,20 @@ int GDOP::get_h_values(const Number* x, Number* values, Number obj_factor, const
             // eval hessian lagrange
             if (problem->L) {
                 const double lFactor = obj_factor * mesh.deltaT[i] * rk.b[j];
-                evalHessianA_B(values, x, *problem->L, lFactor, xij, uij, tij, i, j);
+                addHessianA_B_C(values, x, *problem->L, lFactor, xij, uij, tij, i, j);
             }
 
             // eval hessian dynamics
             for (auto const& f : problem->F) {
                 const double fFactor = -lambda[eq] * mesh.deltaT[i];
-                evalHessianA_B(values, x, *f, fFactor, xij, uij, tij, i, j);
+                addHessianA_B_C(values, x, *f, fFactor, xij, uij, tij, i, j);
                 eq++;
             }
 
             // eval hessian path constraints
             for (auto const& g : problem->G) {
                 const double gFactor = lambda[eq];
-                evalHessianA_B(values, x, *g, gFactor, xij, uij, tij, i, j);
+                addHessianA_B_C(values, x, *g, gFactor, xij, uij, tij, i, j);
                 eq++;
             }
         }
@@ -1124,20 +1131,20 @@ int GDOP::get_h_values(const Number* x, Number* values, Number obj_factor, const
         // eval hessian lagrange
         if (problem->L) {
             const double lagrFactor = obj_factor * mesh.deltaT[(mesh.intervals - 1)] * rk.b[j];
-            evalHessianA_B(values, x, *problem->L, lagrFactor, xij, uij, tij, (mesh.intervals - 1), j);
+            addHessianA_B_C(values, x, *problem->L, lagrFactor, xij, uij, tij, (mesh.intervals - 1), j);
         }
 
         // eval hessian dynamics
         for (auto const& f : problem->F) {
             const double fFactor = lambda[eq] * (-mesh.deltaT[(mesh.intervals - 1)]);
-            evalHessianA_B(values, x, *f, fFactor, xij, uij, tij, mesh.intervals - 1, j);
+            addHessianA_B_C(values, x, *f, fFactor, xij, uij, tij, mesh.intervals - 1, j);
             eq++;
         }
 
         // eval hessian path constraints
         for (auto const& g : problem->G) {
             const double gFactor = lambda[eq];
-            evalHessianA_B(values, x, *g, gFactor, xij, uij, tij, mesh.intervals - 1, j);
+            addHessianA_B_C(values, x, *g, gFactor, xij, uij, tij, mesh.intervals - 1, j);
             eq++;
         }
     }
@@ -1149,40 +1156,40 @@ int GDOP::get_h_values(const Number* x, Number* values, Number obj_factor, const
     // eval hessian mayer term
     if (problem->M) {
         const double mayFactor = obj_factor;
-        evalHessianAt_Bt(values, x, *problem->M, mayFactor, xnm, unm, mesh.tf);
+        addHessianAt_Bt_C(values, x, *problem->M, mayFactor, xnm, unm, mesh.tf);
     }
 
     // eval hessian lagrange term
     if (problem->L) {
         const double lagrFactor = obj_factor * mesh.deltaT[(mesh.intervals - 1)] * rk.b[rk.steps - 1];
-        evalHessianAt_Bt(values, x, *problem->L, lagrFactor, xnm, unm, mesh.tf);
+        addHessianAt_Bt_C(values, x, *problem->L, lagrFactor, xnm, unm, mesh.tf);
     }
 
     // eval hessian dynamics
     for (auto const& f : problem->F) {
         const double fFactor = lambda[eq] * (-mesh.deltaT[(mesh.intervals - 1)]);
-        evalHessianAt_Bt(values, x, *f, fFactor, xnm, unm, mesh.tf);
+        addHessianAt_Bt_C(values, x, *f, fFactor, xnm, unm, mesh.tf);
         eq++;
     }
 
     // eval hessian path constraints
     for (auto const& g : problem->G) {
         const double gFactor = lambda[eq];
-        evalHessianAt_Bt(values, x, *g, gFactor, xnm, unm, mesh.tf);
+        addHessianAt_Bt_C(values, x, *g, gFactor, xnm, unm, mesh.tf);
         eq++;
     }
 
     // eval hessian final constraints
     for (auto const& r : problem->R) {
         const double rFactor = lambda[eq];
-        evalHessianAt_Bt(values, x, *r, rFactor, xnm, unm, mesh.tf);
+        addHessianAt_Bt_C(values, x, *r, rFactor, xnm, unm, mesh.tf);
         eq++;
     }
 
     // eval hessian algebraic parametric constraints
     for (auto const& a : problem->A) {
         const double aFactor = lambda[eq];
-        evalHessianC(values, x, *a, aFactor);
+        addHessianParametricEquations(values, x, *a, aFactor);
         eq++;
     }
     return eq;

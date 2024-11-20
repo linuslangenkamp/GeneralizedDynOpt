@@ -28,7 +28,8 @@ model.meshAlgorithm = MeshAlgorithm.L2_BOUNDARY_NORM
 model.meshIterations = 6
 model.tolerance = 1e-12
 
-model.optimize(tf=0.5, steps=100, rksteps=2)
+model.optimize(tf=0.5, steps=100, rksteps=3, flags={"exportJacobianPath": "/tmp"})
 
 model.plot(dots=Dots.BASE)
+model.plotSparseMatrix(matrixType=MatrixType.JACOBIAN)
 model.plotMeshRefinement()

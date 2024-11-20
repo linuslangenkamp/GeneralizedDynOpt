@@ -115,11 +115,11 @@ public:
 
     void get_jac_values(const Number* x, Number* values);
 
-    void evalHessianA_B(Number* values, const Number* x, Expression& expr, double factor, int xij, int uij, double tij, int i, int j);
+    void addHessianA_B_C(Number* values, const Number* x, Expression& expr, double factor, int xij, int uij, double tij, int i, int j);
 
-    void evalHessianAt_Bt(Number* values, const Number* x, Expression& expr, double factor, int xij, int uij, double tij);
+    void addHessianAt_Bt_C(Number* values, const Number* x, Expression& expr, double factor, int xij, int uij, double tij);
 
-    void evalHessianC(Number* values, const Number* x, ParamExpression& expr, double factor);
+    void addHessianParametricEquations(Number* values, const Number* x, ParamExpression& expr, double factor);
 
     void updateDenseHessianLFG(const Expression&, std::vector<std::vector<int>>&, std::vector<std::vector<int>>&, std::vector<std::vector<int>>&,
                                std::vector<std::vector<int>>&, std::vector<std::vector<int>>&) const;

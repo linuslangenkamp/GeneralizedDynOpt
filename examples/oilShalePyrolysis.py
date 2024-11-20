@@ -27,7 +27,7 @@ model.generate()
 
 model.optimize(
     tf=8,
-    steps=500,
+    steps=50,
     rksteps=3,
     flags={"tolerance": 1e-15, "linearSolver": LinearSolver.MA57},
     meshFlags={
@@ -38,5 +38,8 @@ model.optimize(
     },
 )
 
+model.getResults(5)
 model.plot(specifCols=["pyrolytic bitumen", "temperature"])
+for i in range(len(model.resultHistory[5]["time"])):
+    print(model.resultHistory[5]["time"][i], model.resultHistory[5]["temperature"][i] ,model.resultHistory[5]["pyrolytic bitumen"][i])
 model.plotInputsAndRefinement(dotsGraph=Dots.BASE)

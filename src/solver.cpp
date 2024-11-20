@@ -47,6 +47,9 @@
     8 detection for nominal, linear, quadratic, const hessian            1, 2
     9 constructing a p / hp-method?                                      5, 5
     10 add initial constraints -> x0 is variable aswell                  4, 3
+    11 add proper scaling implemented by hand                            5, 4
+
+    -> new branch with 5, 9, 10, 11
 
     others:
     11 plotting features for path constraints, lagrange terms            1, 1
