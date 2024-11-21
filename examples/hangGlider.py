@@ -41,7 +41,6 @@ model.addFinal(vy, eq=-1.28750052)
 
 model.addMayer(x, Objective.MAXIMIZE)
 
-model.setKKTMuGlobalization(False)
 model.setTolerance(1e-10)
 model.setMeshIterations(5)
 model.setMeshAlgorithm(MeshAlgorithm.L2_BOUNDARY_NORM)
