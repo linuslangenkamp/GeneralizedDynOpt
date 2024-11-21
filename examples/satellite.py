@@ -60,4 +60,4 @@ model.optimize(
     },
 )
 
-model.plotInputs()
+model.plot()

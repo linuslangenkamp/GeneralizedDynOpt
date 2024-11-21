@@ -23,7 +23,7 @@ model.generate()
 
 model.optimize(
     tf=1,
-    steps=500,
+    steps=250,
     rksteps=3,
     flags={
         "linearSolver": LinearSolver.MA57,

@@ -511,12 +511,6 @@ bool GDOP::get_starting_point(Index n, bool init_x, Number* x, bool init_z, Numb
 }
 
 bool GDOP::get_scaling_parameters(Number& obj_scaling, bool& use_x_scaling, Index n, Number* x_scaling, bool& use_g_scaling, Index m, Number* g_scaling) {
-    // DONT SCALE HERE, BUT RATHER AUTO SCALE OR BASED ON NOMINAL, BUT SCALE THE FUNCTIONS IN THE PROBLEM NOT THE CONSTRAINTS, SEE D X - DELTA T F = 0!!
-    // better in ipopt loop -> x = unscale(x_scaled) -> call f,g,r,... (x) -> f_scaled = scaled(f(x_unnom)), same for nabla f ...
-    // scaled(f) = 1/nominal(x) * f(x) = 1 / nominal(x) * f(nominal(x) * scaled(x)), with scaled(x) = x_NLP und * nom(f) = nom(xvar) zusätzlich?
-    // e.g. scaled(nabla^2 g) =
-    // note hessian is scaled proportional to nom(x) * nom(y)
-
     use_x_scaling = true;
     use_g_scaling = true;
 
