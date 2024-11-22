@@ -72,7 +72,9 @@ class Expression:
         self.adj = []
         try:
             for sym in expr.free_symbols:
-                if sym in varInfo and not isinstance(varInfo[sym], RuntimeParameterStruct):
+                if sym in varInfo and not isinstance(
+                    varInfo[sym], RuntimeParameterStruct
+                ):
                     self.adj.append(sym)
             sort_symbols(self.adj, varInfo)
         except:
@@ -91,7 +93,14 @@ class Expression:
 
         # Generate second-order derivatives only for lower triangular part
         cEvalDiff2 = [[], [], [], [], [], []]
-        adjDiff_indices = [[], [], [], [], [], []]  # indXX, indUX, indUU, indPX, indPU, indPP
+        adjDiff_indices = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+        ]  # indXX, indUX, indUU, indPX, indPU, indPP
         allDiffs2 = []
         diffVars2 = []
 
@@ -99,9 +108,21 @@ class Expression:
             for j, var2 in enumerate(self.adj):
                 info1, info2 = varInfo[var1], varInfo[var2]
                 if not (
-                    (isinstance(info1, StateStruct) and isinstance(info2, StateStruct) and i < j)
-                    or (isinstance(info1, InputStruct) and isinstance(info2, InputStruct) and i < j)
-                    or (isinstance(info1, ParameterStruct) and isinstance(info2, ParameterStruct) and i < j)
+                    (
+                        isinstance(info1, StateStruct)
+                        and isinstance(info2, StateStruct)
+                        and i < j
+                    )
+                    or (
+                        isinstance(info1, InputStruct)
+                        and isinstance(info2, InputStruct)
+                        and i < j
+                    )
+                    or (
+                        isinstance(info1, ParameterStruct)
+                        and isinstance(info2, ParameterStruct)
+                        and i < j
+                    )
                 ):
 
                     der = diff(self.expr, var1)
@@ -131,7 +152,9 @@ class Expression:
             elif isinstance(info1, ParameterStruct) and isinstance(info2, InputStruct):
                 cEvalDiff2[4].append(toCode(expr))
                 adjDiff_indices[4].append((info1.id, info2.id))  # indPU
-            elif isinstance(info1, ParameterStruct) and isinstance(info2, ParameterStruct):
+            elif isinstance(info1, ParameterStruct) and isinstance(
+                info2, ParameterStruct
+            ):
                 cEvalDiff2[5].append(toCode(expr))
                 adjDiff_indices[5].append((info1.id, info2.id))  # indPP
 
@@ -265,7 +288,14 @@ class Constraint(Expression):
 
         # Generate second-order derivatives only for lower triangular part
         cEvalDiff2 = [[], [], [], [], [], []]
-        adjDiff_indices = [[], [], [], [], [], []]  # indXX, indUX, indUU, indPX, indPU, indPP
+        adjDiff_indices = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+        ]  # indXX, indUX, indUU, indPX, indPU, indPP
         allDiffs2 = []
         diffVars2 = []
 
@@ -273,9 +303,21 @@ class Constraint(Expression):
             for j, var2 in enumerate(self.adj):
                 info1, info2 = varInfo[var1], varInfo[var2]
                 if not (
-                    (isinstance(info1, StateStruct) and isinstance(info2, StateStruct) and i < j)
-                    or (isinstance(info1, InputStruct) and isinstance(info2, InputStruct) and i < j)
-                    or (isinstance(info1, ParameterStruct) and isinstance(info2, ParameterStruct) and i < j)
+                    (
+                        isinstance(info1, StateStruct)
+                        and isinstance(info2, StateStruct)
+                        and i < j
+                    )
+                    or (
+                        isinstance(info1, InputStruct)
+                        and isinstance(info2, InputStruct)
+                        and i < j
+                    )
+                    or (
+                        isinstance(info1, ParameterStruct)
+                        and isinstance(info2, ParameterStruct)
+                        and i < j
+                    )
                 ):
 
                     der = diff(self.expr, var1)
@@ -305,7 +347,9 @@ class Constraint(Expression):
             elif isinstance(info1, ParameterStruct) and isinstance(info2, InputStruct):
                 cEvalDiff2[4].append(toCode(expr))
                 adjDiff_indices[4].append((info1.id, info2.id))  # indPU
-            elif isinstance(info1, ParameterStruct) and isinstance(info2, ParameterStruct):
+            elif isinstance(info1, ParameterStruct) and isinstance(
+                info2, ParameterStruct
+            ):
                 cEvalDiff2[5].append(toCode(expr))
                 adjDiff_indices[5].append((info1.id, info2.id))  # indPP
 
@@ -358,7 +402,7 @@ class Constraint(Expression):
         out += f"\tstatic std::unique_ptr<{name}> create() {{\n"
         out += f"\t\tAdjacency adj{adj};\n"
         out += f"\t\tAdjacencyDiff adjDiff{adjDiff};\n"
-        out += f"\t\treturn std::unique_ptr<{name}>(new {name}(std::move(adj), std::move(adjDiff), {lb}, {ub}));\n"
+        out += f"\t\treturn std::unique_ptr<{name}>(new {name}(std::move(adj), std::move(adjDiff), {toCode(lb)}, {toCode(ub)}));\n"
         out += "\t}\n\n"
 
         out += "\tdouble eval(const double *x, const double *u, const double *p, double t) override {\n"
@@ -435,7 +479,11 @@ class ParametricConstraint(Expression):
         for i, var1 in enumerate(self.adj):
             for j, var2 in enumerate(self.adj):
                 info1, info2 = varInfo[var1], varInfo[var2]
-                if isinstance(info1, ParameterStruct) and isinstance(info2, ParameterStruct) and i >= j:
+                if (
+                    isinstance(info1, ParameterStruct)
+                    and isinstance(info2, ParameterStruct)
+                    and i >= j
+                ):
                     der = diff(self.expr, var1)
                     if var2 in der.free_symbols:
                         der = diff(der, var2)
@@ -466,7 +514,11 @@ class ParametricConstraint(Expression):
             cEvalDiff.append(toCode(expr))
 
         adj = f"{{{', '.join(map(str, adj_indices))}}}"
-        adjDiff = "{{{}}}".format(", ".join("{{{}}}".format(", ".join(map(str, tpl))) for tpl in adjDiff_indices))
+        adjDiff = "{{{}}}".format(
+            ", ".join(
+                "{{{}}}".format(", ".join(map(str, tpl))) for tpl in adjDiff_indices
+            )
+        )
 
         lb = self.lb if self.lb != -float("inf") else "MINUS_INFINITY"
         ub = self.ub if self.ub != float("inf") else "PLUS_INFINITY"
@@ -476,7 +528,7 @@ class ParametricConstraint(Expression):
         out += f"\tstatic std::unique_ptr<{name}> create() {{\n"
         out += f"\t\tParamAdjacency adj{{{adj}}};\n"
         out += f"\t\tParamAdjacencyDiff adjDiff{{{adjDiff}}};\n"
-        out += f"\t\treturn std::unique_ptr<{name}>(new {name}(std::move(adj), std::move(adjDiff), {lb}, {ub}));\n"
+        out += f"\t\treturn std::unique_ptr<{name}>(new {name}(std::move(adj), std::move(adjDiff), {toCode(lb)}, {toCode(ub)}));\n"
         out += "\t}\n\n"
 
         out += "\tdouble eval(const double* p) override {\n"
@@ -513,9 +565,14 @@ class ParametricConstraint(Expression):
 
 def toCode(expr):
     code = ccode(expr)
-    code = code.replace("True", "true").replace(
-        "False", "false"
-    )  # for piecewise functions, since ccode(True) = True not true
+
+    # for piecewise functions, since ccode(True) = True not true
+    # pi := acos(-1) in symengine, we undo this since a defined M_PI exists
+    code = (
+        code.replace("True", "true")
+        .replace("False", "false")
+        .replace("acos(-1)", "M_PI")
+    )
     return code
 
 
