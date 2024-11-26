@@ -32,9 +32,10 @@ std::string MU_STRATEGY = "adaptive";             // mu strategy - only first me
 std::string MU_STRATEGY_REFINEMENT = "adaptive";  // mu strategy - all mesh iterations
 
 // mesh parameters
-double SIGMA = 2.5;  // basicStrategy: std deviation sigma
-double LEVEL = 0;    // L2BN: L2 criterion factor, log scale, std range -2.5 - 2.5
-double C_TOL = 0.1;  // L2BN: corner criterion P1-error threshold, std range 0.05 - 0.5
+double SIGMA = 2.5;                        // basicStrategy: std deviation sigma
+double LEVEL = 0;                          // L2BN: L2 criterion factor, log scale, std range -2.5 - 2.5
+double C_TOL = 0.1;                        // L2BN: corner criterion P1-error threshold, std range 0.05 - 0.5
+bool STATE_AND_CONTROL_DETECTION = false;  // L2BN: true: detect unsmooth states and control vars, false: only control
 
 // flags for constant derivatives
 bool LINEAR_OBJECTIVE = false;                        // true if M and L are linear
@@ -154,7 +155,7 @@ void setGlobalStandardConfiguration(const std::unordered_map<std::string, std::s
     MESH_ALGORITHM = stringToMeshAlgorithm(configMap.at("MESH_ALGORITHM"));
     RADAU_INTEGRATOR = (IntegratorSteps)std::stoi(configMap.at("RADAU_INTEGRATOR"));
 
-    // oconstant derivatives
+    // constant derivatives
     LINEAR_OBJECTIVE = configMap.at("LINEAR_OBJECTIVE") == "true";
     LINEAR_CONSTRAINTS = configMap.at("LINEAR_CONSTRAINTS") == "true";
     QUADRATIC_OBJECTIVE_LINEAR_CONSTRAINTS = configMap.at("QUADRATIC_OBJECTIVE_LINEAR_CONSTRAINTS") == "true";
@@ -195,7 +196,7 @@ void setGlobalStandardConfiguration(const std::unordered_map<std::string, std::s
         INITIAL_STATES_PATH = configMap.at("INITIAL_STATES_PATH");
     }
 
-    // double mesh flags
+    //  mesh flags
     if ((configMap.find("SIGMA") != configMap.end())) {
         SIGMA = std::stod(configMap.at("SIGMA"));
     }
@@ -204,5 +205,8 @@ void setGlobalStandardConfiguration(const std::unordered_map<std::string, std::s
     }
     if ((configMap.find("C_TOL") != configMap.end())) {
         C_TOL = std::stod(configMap.at("C_TOL"));
+    }
+    if ((configMap.find("STATE_AND_CONTROL_DETECTION") != configMap.end())) {
+        STATE_AND_CONTROL_DETECTION = configMap.at("STATE_AND_CONTROL_DETECTION") == "true";
     }
 }

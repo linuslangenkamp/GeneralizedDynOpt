@@ -86,7 +86,7 @@ model.addFinal(fpa, eq=fpaf)
 
 model.addMayer(-lat)
 
-model.tolerance = 1e-12
+model.tolerance = 1e-14
 model.meshIterations = 8
 model.meshAlgorithm = MeshAlgorithm.L2_BOUNDARY_NORM
 model.muStrategyRefinement = MuStrategy.MONOTONE

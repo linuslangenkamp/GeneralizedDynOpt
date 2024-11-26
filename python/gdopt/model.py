@@ -75,6 +75,7 @@ class Model:
         self.meshLevel = None
         self.meshCTol = None
         self.meshSigma = None
+        self.detectStatesAndControl = None
         self.quadraticObjective = False
         self.linearObjective = False
         self.linearConstraints = False
@@ -547,6 +548,9 @@ class Model:
 
         self.linearConstraints = linearConstraints
 
+    def setDetectStatesAndControl(self, detect):
+        self.detectStatesAndControl = detect
+
     def setExpressionSimplification(self, simp):
         # turn initial simplification of expression at generation on / off, standard = off, good for large models
 
@@ -612,6 +616,8 @@ class Model:
             self.setMuStrategyRefinement(meshFlags["muStrategyRefinement"])
         if "muInitRefinement" in meshFlags:
             self.setMuInitRefinement(meshFlags["muInitRefinement"])
+        if "detectStatesAndControl" in meshFlags:
+            self.setDetectStatesAndControl(meshFlags["detectStatesAndControl"])
 
     def uInitialGuessCodegen(self):
         out = "std::vector<double> initialGuessU(double t) {\n"
@@ -1060,6 +1066,8 @@ int main(int argc, char** argv) {{
             OUTPUT += f"LEVEL {self.meshLevel}\n"
         if self.meshCTol:
             OUTPUT += f"C_TOL {self.meshCTol}\n"
+        if self.detectStatesAndControl is not None:
+            OUTPUT += f"STATE_AND_CONTROL_DETECTION {'true' if self.detectStatesAndControl else 'false'}\n"
 
         OUTPUT += "\n[runtime parameters]\n"
         for rp in self.rpVars:

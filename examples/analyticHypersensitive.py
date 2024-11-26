@@ -27,8 +27,8 @@ model.generate()
 
 model.optimize(
     tf=10000,
-    steps=100,
-    rksteps=9,
+    steps=25,
+    rksteps=5,
     flags={
         "linearSolver": LinearSolver.MA57,
         "quadraticObjective": True,
@@ -39,6 +39,7 @@ model.optimize(
         "iterations": 20,
         "muStrategyRefinement": MuStrategy.MONOTONE,
         "muInitRefinement": 1e-16,
+        "refinementMethod": RefinementMethod.POLYNOMIAL,
     },
 )
 

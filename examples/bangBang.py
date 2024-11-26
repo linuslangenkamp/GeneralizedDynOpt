@@ -5,7 +5,7 @@ model = Model("bangBang")
 x1 = model.addState(start=0)
 x2 = model.addState(start=0)
 
-u = model.addInput(lb=-10, ub=10)
+u = model.addInput(lb=-5, ub=10)
 
 # x1'' = u
 model.addDynamic(x1, x2)
@@ -21,7 +21,7 @@ model.generate()
 
 # optimizer attributes can be set directly as well
 model.meshAlgorithm = MeshAlgorithm.L2_BOUNDARY_NORM
-model.meshIterations = 3
+model.meshIterations = 5
 
 model.optimize(tf=0.5, steps=15, rksteps=3)
 

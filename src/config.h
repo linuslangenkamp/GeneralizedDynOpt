@@ -21,6 +21,7 @@ extern bool USER_SCALING;
 extern double SIGMA;
 extern double LEVEL;
 extern double C_TOL;
+extern bool STATE_AND_CONTROL_DETECTION;
 
 extern int IPOPT_PRINT_LEVEL;
 extern bool KKT_ERROR_MU_GLOBALIZATION;
