@@ -26,7 +26,7 @@ model.addDynamic(v, dvdt)
 model.addDynamic(phi, omega)
 model.addDynamic(omega, (sin(-phi) * G - cos(phi) * dvdt) / R)
 
-# this seems like a dirty hack and is one
+# this seems like a dirty hack
 # the problem has MANY local optima. Therefore it is hard to converge to the global optimum, if only a poor guess is provided.
 # adding this contraints FORCES the global optimal solution,
 # since the lagrange intergrand has to be bounded

@@ -126,12 +126,6 @@ public:
     std::vector<double> evalLagrangeDiff(std::vector<double>&);
     std::vector<double> evalLagrangeDiff2(std::vector<double>&);
 
-    // interpolationFirstLagrangeBasis == LB -> lagrangeBisectedFactorsC
-    // interpolationLagrangeBasis == LB0 -> lagrangeBisectionC0
-
-    // lagrangeBasisDiff -> derMat
-    // lagrangeBasisDiff2 -> derMat2
-
 private:
     Integrator(const std::vector<double>& c, const std::vector<double>& c0, const std::vector<double>& cBisection, const std::vector<double>& c0Bisection,
                const std::vector<double>& b, const std::vector<std::vector<double>>& derMat, const std::vector<std::vector<double>>& derMat2,

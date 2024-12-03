@@ -18,16 +18,16 @@ S = 14
 rho = 1.13
 g = 9.80665
 
-X = (x/R - 2.5)**2
+X = (x / R - 2.5) ** 2
 ua = uM * (1 - X) * exp(-X)
 Vy = vy - ua
 vr = sqrt(vx**2 + Vy**2)
 CD = C0 + k * CL**2
 
-D = 1/2 * CD * rho * S * vr ** 2
-L = 1/2 * CL * rho * S * vr ** 2
+D = 1 / 2 * CD * rho * S * vr**2
+L = 1 / 2 * CL * rho * S * vr**2
 
-sinEta = Vy / vr 
+sinEta = Vy / vr
 cosEta = vx / vr
 
 model.addF(x, vx)
@@ -41,11 +41,11 @@ model.addFinal(vy, eq=-1.28750052)
 
 model.addMayer(x, Objective.MAXIMIZE)
 
-model.setTolerance(1e-10)
-model.setMeshIterations(5)
-model.setMeshAlgorithm(MeshAlgorithm.L2_BOUNDARY_NORM)
-model.setMuStrategyRefinement(MuStrategy.MONOTONE)
-model.setMuInitRefinement(1e-14)
+model.tolerance = 1e-10
+model.meshIterations = 5
+model.meshAlgorithm = MeshAlgorithm.L2_BOUNDARY_NORM
+model.muStrategyRefinement = MuStrategy.MONOTONE
+model.muInitRefinement = 1e-14
 
 model.solve(tf=98.4, steps=25, rksteps=9)
 model.plot(dots=Dots.ALL)

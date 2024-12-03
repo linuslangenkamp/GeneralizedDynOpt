@@ -48,39 +48,39 @@ class Model:
         self.R = []
         self.A = []
         self.name = name.replace(" ", "")
-        self.addedDummy = False
+        self._addedDummy = False
 
         # additional stuff for running the model
-        self.tf = None
-        self.steps = None
-        self.rksteps = None
-        self.outputFilePath = f".generated/{self.name}"
-        self.maxIterations = 5000
-        self.ipoptPrintLevel = None
-        self.kktMuGlobalization = None
-        self.muInit = None
-        self.muInitRefinement = None
-        self.muStrategy = None
-        self.muStrategyRefinement = None
-        self.ivpSolver = IVPSolver.RADAU
-        self.initVars = InitVars.SOLVE
-        self.refinementMethod = RefinementMethod.LINEAR_SPLINE
-        self.linearSolver = LinearSolver.MUMPS
-        self.meshAlgorithm = MeshAlgorithm.NONE
-        self.meshIterations = 0
-        self.tolerance = 1e-14
-        self.exportHessianPath = None
-        self.exportJacobianPath = None
-        self.initialStatesPath = f".generated/{self.name}"
-        self.meshLevel = None
-        self.meshCTol = None
-        self.meshSigma = None
-        self.detectStatesAndControl = None
-        self.quadraticObjective = False
-        self.linearObjective = False
-        self.linearConstraints = False
-        self.autoVariableNominals = False  # TODO: not in use: automatically scale variables and equations that dont have a nominal value
-        self.userScaling = False
+        self._tf = None
+        self._steps = None
+        self._rksteps = None
+        self._outputFilePath = f".generated/{self.name}"
+        self._maxIterations = 5000
+        self._ipoptPrintLevel = None
+        self._kktMuGlobalization = None
+        self._muInit = None
+        self._muInitRefinement = None
+        self._muStrategy = None
+        self._muStrategyRefinement = None
+        self._ivpSolver = IVPSolver.RADAU
+        self._initVars = InitVars.SOLVE
+        self._refinementMethod = RefinementMethod.LINEAR_SPLINE
+        self._linearSolver = LinearSolver.MUMPS
+        self._meshAlgorithm = MeshAlgorithm.NONE
+        self._meshIterations = 0
+        self._tolerance = 1e-14
+        self._exportHessianPath = None
+        self._exportJacobianPath = None
+        self._initialStatesPath = f".generated/{self.name}"
+        self._meshLevel = None
+        self._meshCTol = None
+        self._meshSigma = None
+        self._detectStatesAndControl = None
+        self._quadraticObjective = False
+        self._linearObjective = False
+        self._linearConstraints = False
+        self._autoVariableNominals = False  # TODO: not in use: automatically scale variables and equations that dont have a nominal value
+        self._userScaling = False
 
         # stuff for analyzing the results
         self.resultHistory = {}
@@ -338,7 +338,7 @@ class Model:
 
         x = self.addState(start=0)
         self.addDynamic(x, 0)
-        self.addedDummy = True
+        self._addedDummy = True
 
     def __str__(self):
         M = str(self.M) if self.M != None else ""
@@ -393,7 +393,7 @@ class Model:
                 + [p for p in self.pVars]
                 + [rp for rp in self.rpVars],
                 (
-                    dynEq.expr.subs(FINAL_TIME_SYMBOL, self.tf)
+                    dynEq.expr.subs(FINAL_TIME_SYMBOL, self._tf)
                     if hasattr(dynEq.expr, "subs")
                     else dynEq.expr
                 ),
@@ -406,7 +406,7 @@ class Model:
             Lambdify(
                 [t],
                 (
-                    varInfo[u].initialGuess.subs(FINAL_TIME_SYMBOL, self.tf)
+                    varInfo[u].initialGuess.subs(FINAL_TIME_SYMBOL, self._tf)
                     if hasattr(varInfo[u].initialGuess, "subs")
                     else varInfo[u].initialGuess
                 ),
@@ -429,7 +429,7 @@ class Model:
         ]
 
         runtimeConstantsDict = {rpVar: varInfo[rpVar].value for rpVar in self.rpVars}
-        runtimeConstantsDict[FINAL_TIME_SYMBOL] = self.tf
+        runtimeConstantsDict[FINAL_TIME_SYMBOL] = self._tf
         x0 = [
             (
                 varInfo[x].start.subs(runtimeConstantsDict)
@@ -438,118 +438,245 @@ class Model:
             )
             for x in self.xVars
         ]
-        timeHorizon = [0, self.tf]
+        timeHorizon = [0, self._tf]
 
         # scipy.solve_ivp
         solution = solve_ivp(
             ode,
             timeHorizon,
             x0,
-            method=self.ivpSolver.name,
+            method=self._ivpSolver.name,
             dense_output=True,
             rtol=1e-10,
         )
 
         # get solution at the RadauIIA nodes (based on self.rksteps)
-        timeVals = generateRadauNodes(timeHorizon, self.steps, self.rksteps)
+        timeVals = generateRadauNodes(timeHorizon, self._steps, self._rksteps)
         stateVals = solution.sol(timeVals)
         return timeVals, stateVals
 
-    def setFinalTime(self, tf: float):
-        self.tf = tf
+    @property
+    def tf(self) -> float:
+        return self._tf
 
-    def setSteps(self, steps: int):
-        self.steps = steps
+    @tf.setter
+    def tf(self, tf: float):
+        self._tf = tf
 
-    def setRkSteps(self, rksteps: int):
-        self.rksteps = rksteps
+    @property
+    def steps(self) -> int:
+        return self._steps
 
-    def setMaxIterations(self, iterations: int):
-        self.maxIterations = iterations
+    @steps.setter
+    def steps(self, steps: int):
+        self._steps = steps
 
-    def setIpoptPrintLevel(self, printLevel: int):
-        self.ipoptPrintLevel = printLevel
+    @property
+    def rksteps(self) -> int:
+        return self._rksteps
 
-    def setMuInit(self, muInit: float):
-        self.muInit = muInit
+    @rksteps.setter
+    def rksteps(self, rksteps: int):
+        self._rksteps = rksteps
 
-    def setMuInitRefinement(self, muInitRefinement: float):
-        self.muInitRefinement = muInitRefinement
+    @property
+    def maxIterations(self) -> int:
+        return self._maxIterations
 
-    def setMuStrategy(self, muStrategy: str):
-        self.muStrategy = muStrategy
+    @maxIterations.setter
+    def maxIterations(self, iterations: int):
+        self._maxIterations = iterations
 
-    def setMuStrategyRefinement(self, muStrategyRefinement: str):
-        self.muStrategyRefinement = muStrategyRefinement
+    @property
+    def ipoptPrintLevel(self) -> int:
+        return self._ipoptPrintLevel
 
-    def setOutputPath(self, path: str):
-        self.outputFilePath = path
+    @ipoptPrintLevel.setter
+    def ipoptPrintLevel(self, printLevel: int):
+        self._ipoptPrintLevel = printLevel
 
-    def setLinearSolver(self, solver: LinearSolver):
-        self.linearSolver = solver
+    @property
+    def muInit(self) -> float:
+        return self._muInit
 
-    def setInitVars(self, initVars: InitVars):
-        self.initVars = initVars
+    @muInit.setter
+    def muInit(self, muInit: float):
+        self._muInit = muInit
 
-    def setTolerance(self, tolerance: float):
-        self.tolerance = tolerance
+    @property
+    def muInitRefinement(self) -> float:
+        return self._muInitRefinement
 
-    def setKKTMuGlobalization(self, kktMuGlobalization: bool):
-        self.kktMuGlobalization = kktMuGlobalization
+    @muInitRefinement.setter
+    def muInitRefinement(self, muInitRefinement: float):
+        self._muInitRefinement = muInitRefinement
 
-    def setExportHessianPath(self, path: str):
-        self.exportHessianPath = path
+    @property
+    def muStrategy(self) -> str:
+        return self._muStrategy
 
-    def setExportJacobianPath(self, path: str):
-        self.exportJacobianPath = path
+    @muStrategy.setter
+    def muStrategy(self, muStrategy: str):
+        self._muStrategy = muStrategy
 
-    def setInitialStatesPath(self, path: str):
-        self.initialStatesPath = path
+    @property
+    def muStrategyRefinement(self) -> str:
+        return self._muStrategyRefinement
 
-    def setIVPSolver(self, solver: IVPSolver):
-        # set IVP Solver for initial guess of states. (see scipy.solve_ivp)
-        # default = IVPSolver.Radau (should be best), others: BDF, LSODA, RK45, DOP853, RK23
+    @muStrategyRefinement.setter
+    def muStrategyRefinement(self, muStrategyRefinement: str):
+        self._muStrategyRefinement = muStrategyRefinement
 
-        self.ivpSolver = solver
+    @property
+    def outputFilePath(self) -> str:
+        return self._outputFilePath
 
-    def setRefinementMethod(self, refinementMethod: RefinementMethod):
-        self.refinementMethod = refinementMethod
+    @outputFilePath.setter
+    def outputFilePath(self, path: str):
+        self._outputFilePath = path
 
-    def setMeshAlgorithm(self, meshAlgorithm: MeshAlgorithm):
-        self.meshAlgorithm = meshAlgorithm
+    @property
+    def linearSolver(self):
+        return self._linearSolver
 
-    def setMeshIterations(self, meshIterations: int):
-        self.meshIterations = meshIterations
+    @linearSolver.setter
+    def linearSolver(self, solver):
+        self._linearSolver = solver
 
-    def setMeshLevel(self, meshLevel: float):
-        self.meshLevel = meshLevel
+    @property
+    def initVars(self):
+        return self._initVars
 
-    def setMeshCTol(self, meshCTol: float):
-        self.meshCTol = meshCTol
+    @initVars.setter
+    def initVars(self, initVars):
+        self._initVars = initVars
 
-    def setMeshSigma(self, meshSigma: float):
-        self.meshSigma = meshSigma
+    @property
+    def tolerance(self) -> float:
+        return self._tolerance
 
-    def setUserScaling(self, userScaling: bool):
-        self.userScaling = userScaling
+    @tolerance.setter
+    def tolerance(self, tolerance: float):
+        self._tolerance = tolerance
+
+    @property
+    def kktMuGlobalization(self) -> bool:
+        return self._kktMuGlobalization
+
+    @kktMuGlobalization.setter
+    def kktMuGlobalization(self, kktMuGlobalization: bool):
+        self._kktMuGlobalization = kktMuGlobalization
+
+    @property
+    def exportHessianPath(self) -> str:
+        return self._exportHessianPath
+
+    @exportHessianPath.setter
+    def exportHessianPath(self, path: str):
+        self._exportHessianPath = path
+
+    @property
+    def exportJacobianPath(self) -> str:
+        return self._exportJacobianPath
+
+    @exportJacobianPath.setter
+    def exportJacobianPath(self, path: str):
+        self._exportJacobianPath = path
+
+    @property
+    def initialStatesPath(self) -> str:
+        return self._initialStatesPath
+
+    @initialStatesPath.setter
+    def initialStatesPath(self, path: str):
+        self._initialStatesPath = path
+
+    @property
+    def ivpSolver(self):
+        return self._ivpSolver
+
+    @ivpSolver.setter
+    def ivpSolver(self, solver):
+        self._ivpSolver = solver
+
+    @property
+    def refinementMethod(self):
+        return self._refinementMethod
+
+    @refinementMethod.setter
+    def refinementMethod(self, refinementMethod):
+        self._refinementMethod = refinementMethod
+
+    @property
+    def meshAlgorithm(self):
+        return self._meshAlgorithm
+
+    @meshAlgorithm.setter
+    def meshAlgorithm(self, meshAlgorithm):
+        self._meshAlgorithm = meshAlgorithm
+
+    @property
+    def meshIterations(self) -> int:
+        return self._meshIterations
+
+    @meshIterations.setter
+    def meshIterations(self, meshIterations: int):
+        self._meshIterations = meshIterations
+
+    @property
+    def meshLevel(self) -> float:
+        return self._meshLevel
+
+    @meshLevel.setter
+    def meshLevel(self, meshLevel: float):
+        self._meshLevel = meshLevel
+
+    @property
+    def meshCTol(self) -> float:
+        return self._meshCTol
+
+    @meshCTol.setter
+    def meshCTol(self, meshCTol: float):
+        self._meshCTol = meshCTol
+
+    @property
+    def meshSigma(self) -> float:
+        return self._meshSigma
+
+    @meshSigma.setter
+    def meshSigma(self, meshSigma: float):
+        self._meshSigma = meshSigma
+
+    @property
+    def userScaling(self) -> bool:
+        return self._userScaling
+
+    @userScaling.setter
+    def userScaling(self, userScaling: bool):
+        self._userScaling = userScaling
+
+    @property
+    def detectStatesAndControl(self):
+        return self._detectStatesAndControl
+
+    @detectStatesAndControl.setter
+    def detectStatesAndControl(self, detect):
+        self._detectStatesAndControl = detect
 
     def hasLinearObjective(self, linearObjective=True):
         # set this if both Mayer and Lagrange are linear
 
-        self.linearObjective = linearObjective
+        self._linearObjective = linearObjective
 
     def hasQuadraticObjective(self, quadraticObjective=True):
         # set this if both Mayer and Lagrange are quadratic
 
-        self.quadraticObjective = quadraticObjective
+        self._quadraticObjective = quadraticObjective
 
     def hasLinearConstraints(self, linearConstraints=True):
         # set this if all constraints, i.e. f, g, r and a are linear
 
-        self.linearConstraints = linearConstraints
-
-    def setDetectStatesAndControl(self, detect):
-        self.detectStatesAndControl = detect
+        self._linearConstraints = linearConstraints
 
     def setExpressionSimplification(self, simp):
         # turn initial simplification of expression at generation on / off, standard = off, good for large models
@@ -561,63 +688,63 @@ class Model:
             print(
                 "[GDOPT - ATTENTION] Output of optimal solution has been disabled. Thus, the analysis can not be used."
             )
-            self.outputFilePath = None
+            self._outputFilePath = None
 
     def setFlags(self, flags):
         if "outputPath" in flags:
-            self.setOutputPath(flags["outputPath"])
+            self.outputFilePath = flags["outputPath"]
         if "disableOutput" in flags:
-            self.disableOutputPath(flags["disableOutput"])
+            self.disableOutputPath = flags["disableOutput"]
         if "linearSolver" in flags:
-            self.setLinearSolver(flags["linearSolver"])
+            self.linearSolver = flags["linearSolver"]
         if "tolerance" in flags:
-            self.setTolerance(flags["tolerance"])
+            self.tolerance = flags["tolerance"]
         if "exportHessianPath" in flags:
-            self.setExportHessianPath(flags["exportHessianPath"])
+            self.exportHessianPath = flags["exportHessianPath"]
         if "exportJacobianPath" in flags:
-            self.setExportJacobianPath(flags["exportJacobianPath"])
+            self.exportJacobianPath = flags["exportJacobianPath"]
         if "initialStatesPath" in flags:
-            self.setInitialStatesPath(flags["initialStatesPath"])
+            self.initialStatesPath = flags["initialStatesPath"]
         if "ivpSolver" in flags:
-            self.setIVPSolver(flags["ivpSolver"])
+            self.ivpSolver = flags["ivpSolver"]
         if "initVars" in flags:
-            self.setInitVars(flags["initVars"])
+            self.initVars = flags["initVars"]
         if "maxIterations" in flags:
-            self.setMaxIterations(flags["maxIterations"])
+            self.maxIterations = flags["maxIterations"]
         if "ipoptPrintLevel" in flags:
-            self.setIpoptPrintLevel(flags["ipoptPrintLevel"])
+            self.ipoptPrintLevel = flags["ipoptPrintLevel"]
+        if "kktMuGlobalization" in flags:
+            self.kktMuGlobalization = flags["kktMuGlobalization"]
+        if "muStrategy" in flags:
+            self.muStrategy = flags["muStrategy"]
+        if "muInit" in flags:
+            self.muInit = flags["muInit"]
         if "linearObjective" in flags:
             self.hasLinearObjective(flags["linearObjective"])
         if "quadraticObjective" in flags:
             self.hasQuadraticObjective(flags["quadraticObjective"])
         if "linearConstraints" in flags:
             self.hasLinearConstraints(flags["linearConstraints"])
-        if "kktMuGlobalization" in flags:
-            self.setKKTMuGlobalization(flags["kktMuGlobalization"])
-        if "muStrategy" in flags:
-            self.setMuStrategy(flags["muStrategy"])
-        if "muInit" in flags:
-            self.setMuInit(flags["muInit"])
 
     def setMeshFlags(self, meshFlags):
         if "algorithm" in meshFlags:
-            self.setMeshAlgorithm(meshFlags["algorithm"])
+            self.meshAlgorithm = meshFlags["algorithm"]
         if "iterations" in meshFlags:
-            self.setMeshIterations(meshFlags["iterations"])
+            self.meshIterations = meshFlags["iterations"]
         if "refinementMethod" in meshFlags:
-            self.setRefinementMethod(meshFlags["refinementMethod"])
+            self.refinementMethod = meshFlags["refinementMethod"]
         if "level" in meshFlags:
-            self.setMeshLevel(meshFlags["level"])
+            self.meshLevel = meshFlags["level"]
         if "cTol" in meshFlags:
-            self.setMeshCTol(meshFlags["cTol"])
+            self.meshCTol = meshFlags["cTol"]
         if "sigma" in meshFlags:
-            self.setMeshSigma(meshFlags["sigma"])
+            self.meshSigma = meshFlags["sigma"]
         if "muStrategyRefinement" in meshFlags:
-            self.setMuStrategyRefinement(meshFlags["muStrategyRefinement"])
+            self.muStrategyRefinement = meshFlags["muStrategyRefinement"]
         if "muInitRefinement" in meshFlags:
-            self.setMuInitRefinement(meshFlags["muInitRefinement"])
+            self.muInitRefinement = meshFlags["muInitRefinement"]
         if "detectStatesAndControl" in meshFlags:
-            self.setDetectStatesAndControl(meshFlags["detectStatesAndControl"])
+            self.detectStatesAndControl = meshFlags["detectStatesAndControl"]
 
     def uInitialGuessCodegen(self):
         out = "std::vector<double> initialGuessU(double t) {\n"
@@ -643,7 +770,7 @@ class Model:
     def checkNominalNone(self, nominal):
         # forces userScaling to True, if a single nominal is provided in the model -> else its False
         if nominal is not None:
-            self.userScaling = True
+            self._userScaling = True
 
     def initAnalysis(self):
         # clear result history for new optimization
@@ -951,23 +1078,23 @@ int main(int argc, char** argv) {{
         # run the code
 
         if not resimulate:  # use everything from the previous optimization
-            if not self.addedDummy:  # use provided values / standard values
-                self.setFinalTime(tf)
-                self.setSteps(steps)
-                self.setRkSteps(rksteps)
+            if not self._addedDummy:  # use provided values / standard values
+                self.tf = tf
+                self.steps = steps
+                self.rksteps = rksteps
             else:  # purely parametric
                 print(
                     "[GDOPT - ATTENTION] Setting tf = 0, steps = 1, rksteps = 1, since the model is purely parametric."
                 )
-                self.setFinalTime(0)
-                self.setSteps(1)
-                self.setRkSteps(1)
+                self.tf = 0
+                self.steps = 1
+                self.rksteps = 1
 
             self.setFlags(flags)
             self.setMeshFlags(meshFlags)
 
         # solve the IVP with scipy if set
-        if self.initVars == InitVars.SOLVE:
+        if self._initVars == InitVars.SOLVE:
             self.initialStatesCode()
 
         # configuration codegen
@@ -999,9 +1126,9 @@ int main(int argc, char** argv) {{
         )
 
         print(
-            f"[GDOPT - INFO] Writing guesses to {self.initialStatesPath + '/initialValues.csv'}..."
+            f"[GDOPT - INFO] Writing guesses to {self._initialStatesPath + '/initialValues.csv'}..."
         )
-        with open(self.initialStatesPath + "/initialValues.csv", "w") as file:
+        with open(self._initialStatesPath + "/initialValues.csv", "w") as file:
             for i in range(len(timeVals)):
                 row = (
                     []
@@ -1016,58 +1143,58 @@ int main(int argc, char** argv) {{
         # generates the code for the .config file
 
         OUTPUT = "[standard model parameters]\n"
-        OUTPUT += f"FINAL_TIME {self.tf}\n"
-        OUTPUT += f"INTERVALS {self.steps}\n"
-        OUTPUT += f"RADAU_INTEGRATOR {self.rksteps}\n"
-        OUTPUT += f"LINEAR_SOLVER {self.linearSolver.name}\n"
-        OUTPUT += f"INIT_VARS {self.initVars.name}\n"
-        OUTPUT += f"TOLERANCE {self.tolerance}\n"
-        OUTPUT += f"MAX_ITERATIONS {self.maxIterations}\n"
-        OUTPUT += f"MESH_ALGORITHM {self.meshAlgorithm.name}\n"
-        OUTPUT += f"MESH_ITERATIONS {self.meshIterations}\n"
-        OUTPUT += f"REFINEMENT_METHOD {self.refinementMethod.name}\n"
-        OUTPUT += f"USER_SCALING {'true' if self.userScaling else 'false'}\n"
+        OUTPUT += f"FINAL_TIME {self._tf}\n"
+        OUTPUT += f"INTERVALS {self._steps}\n"
+        OUTPUT += f"RADAU_INTEGRATOR {self._rksteps}\n"
+        OUTPUT += f"LINEAR_SOLVER {self._linearSolver.name}\n"
+        OUTPUT += f"INIT_VARS {self._initVars.name}\n"
+        OUTPUT += f"TOLERANCE {self._tolerance}\n"
+        OUTPUT += f"MAX_ITERATIONS {self._maxIterations}\n"
+        OUTPUT += f"MESH_ALGORITHM {self._meshAlgorithm.name}\n"
+        OUTPUT += f"MESH_ITERATIONS {self._meshIterations}\n"
+        OUTPUT += f"REFINEMENT_METHOD {self._refinementMethod.name}\n"
+        OUTPUT += f"USER_SCALING {'true' if self._userScaling else 'false'}\n"
 
         OUTPUT += "\n[constant derivatives]\n"
-        OUTPUT += f"LINEAR_OBJECTIVE {'true' if self.linearObjective else 'false'}\n"
-        OUTPUT += f"QUADRATIC_OBJECTIVE_LINEAR_CONSTRAINTS {'true' if ((self.quadraticObjective or self.linearObjective) and self.linearConstraints) else 'false'}\n"
+        OUTPUT += f"LINEAR_OBJECTIVE {'true' if self._linearObjective else 'false'}\n"
+        OUTPUT += f"QUADRATIC_OBJECTIVE_LINEAR_CONSTRAINTS {'true' if ((self._quadraticObjective or self._linearObjective) and self._linearConstraints) else 'false'}\n"
         OUTPUT += (
-            f"LINEAR_CONSTRAINTS {'true' if self.linearConstraints else 'false'}\n"
+            f"LINEAR_CONSTRAINTS {'true' if self._linearConstraints else 'false'}\n"
         )
 
         OUTPUT += "\n[optionals: ipopt flags]\n"
-        if self.kktMuGlobalization is not None:
-            OUTPUT += f"KKT_ERROR_MU_GLOBALIZATION {'true' if self.kktMuGlobalization else 'false'}\n"
-        if self.ipoptPrintLevel is not None:
-            OUTPUT += f"IPOPT_PRINT_LEVEL {self.ipoptPrintLevel}\n"
-        if self.muInit is not None:
-            OUTPUT += f"MU_INIT {self.muInit}\n"
-        if self.muStrategy is not None:
-            OUTPUT += f"MU_STRATEGY {self.muStrategy}\n"
-        if self.muInitRefinement is not None:
-            OUTPUT += f"MU_INIT_REFINEMENT {self.muInitRefinement}\n"
-        if self.muStrategyRefinement is not None:
-            OUTPUT += f"MU_STRATEGY_REFINEMENT {self.muStrategyRefinement}\n"
+        if self._kktMuGlobalization is not None:
+            OUTPUT += f"KKT_ERROR_MU_GLOBALIZATION {'true' if self._kktMuGlobalization else 'false'}\n"
+        if self._ipoptPrintLevel is not None:
+            OUTPUT += f"IPOPT_PRINT_LEVEL {self._ipoptPrintLevel}\n"
+        if self._muInit is not None:
+            OUTPUT += f"MU_INIT {self._muInit}\n"
+        if self._muStrategy is not None:
+            OUTPUT += f"MU_STRATEGY {self._muStrategy}\n"
+        if self._muInitRefinement is not None:
+            OUTPUT += f"MU_INIT_REFINEMENT {self._muInitRefinement}\n"
+        if self._muStrategyRefinement is not None:
+            OUTPUT += f"MU_STRATEGY_REFINEMENT {self._muStrategyRefinement}\n"
 
         OUTPUT += "\n[optionals: output]\n"
-        if self.outputFilePath:
-            OUTPUT += f'EXPORT_OPTIMUM_PATH "{self.outputFilePath}"\n'
-        if self.exportHessianPath:
-            OUTPUT += f'EXPORT_HESSIAN_PATH "{self.exportHessianPath}"\n'
-        if self.exportJacobianPath:
-            OUTPUT += f'EXPORT_JACOBIAN_PATH "{self.exportJacobianPath}"\n'
-        if self.initVars == InitVars.SOLVE and self.initialStatesPath:
-            OUTPUT += f'INITIAL_STATES_PATH "{self.initialStatesPath}"\n'
+        if self._outputFilePath:
+            OUTPUT += f'EXPORT_OPTIMUM_PATH "{self._outputFilePath}"\n'
+        if self._exportHessianPath:
+            OUTPUT += f'EXPORT_HESSIAN_PATH "{self._exportHessianPath}"\n'
+        if self._exportJacobianPath:
+            OUTPUT += f'EXPORT_JACOBIAN_PATH "{self._exportJacobianPath}"\n'
+        if self._initVars == InitVars.SOLVE and self._initialStatesPath:
+            OUTPUT += f'INITIAL_STATES_PATH "{self._initialStatesPath}"\n'
 
         OUTPUT += "\n[optionals: mesh refinement]\n"
-        if self.meshSigma:
-            OUTPUT += f"SIGMA {self.meshSigma}\n"
-        if self.meshLevel:
-            OUTPUT += f"LEVEL {self.meshLevel}\n"
-        if self.meshCTol:
-            OUTPUT += f"C_TOL {self.meshCTol}\n"
-        if self.detectStatesAndControl is not None:
-            OUTPUT += f"STATE_AND_CONTROL_DETECTION {'true' if self.detectStatesAndControl else 'false'}\n"
+        if self._meshSigma:
+            OUTPUT += f"SIGMA {self._meshSigma}\n"
+        if self._meshLevel:
+            OUTPUT += f"LEVEL {self._meshLevel}\n"
+        if self._meshCTol:
+            OUTPUT += f"C_TOL {self._meshCTol}\n"
+        if self._detectStatesAndControl is not None:
+            OUTPUT += f"STATE_AND_CONTROL_DETECTION {'true' if self._detectStatesAndControl else 'false'}\n"
 
         OUTPUT += "\n[runtime parameters]\n"
         for rp in self.rpVars:
@@ -1100,7 +1227,11 @@ int main(int argc, char** argv) {{
         if meshIteration not in self.resultHistory:
             try:
                 results = pd.read_csv(
-                    self.outputFilePath + "/" + self.name + str(meshIteration) + ".csv",
+                    self._outputFilePath
+                    + "/"
+                    + self.name
+                    + str(meshIteration)
+                    + ".csv",
                     delimiter=",",
                 )
             except:
@@ -1109,7 +1240,7 @@ int main(int argc, char** argv) {{
                 )
 
             # remove dummy column for purely parametric models
-            if self.addedDummy:
+            if self._addedDummy:
                 results = results.drop(columns=["x[0]"])
 
             alias = {variable.name: varInfo[variable].symbol for variable in varInfo}
@@ -1170,6 +1301,87 @@ int main(int argc, char** argv) {{
                 meshIteration = maxMeshIteration
         return meshIteration
 
+    def exportToCombiTable(
+        self,
+        specificCols,
+        path="",
+        meshIteration=None,
+        polySteps=40,
+        linearControl=False,
+    ):
+        """
+        Export to OpenModelica CombiTable format
+        """
+
+        print("[GDOPT - INFO] Exporting to CombiTable...")
+        meshIteration = self.checkMeshIteration(meshIteration)
+        self.getResults(meshIteration=meshIteration)
+
+        if not path:
+            path = (
+                self._outputFilePath
+                + "/"
+                + self.name
+                + "CombiTable"
+                + str(meshIteration)
+                + ".txt"
+            )
+
+        length = len(self.resultHistory[meshIteration]["time"])
+        with open(path, "w") as f:
+            # interpolate values according to collocation scheme here
+            tvals = []
+            vals = [[] for _ in range(len(specificCols))]
+            intervals = [
+                (i * self.rksteps, (i + 1) * self.rksteps)
+                for i in range((length - 1) // self.rksteps)
+            ]
+
+            for idx, (start, end) in enumerate(intervals):
+                t_interval = np.array(self.resultHistory[meshIteration]["time"])[
+                    start : end + 1
+                ]
+                tDense = np.linspace(t_interval[0], t_interval[-1], polySteps)
+
+                if idx == 0:
+                    tvals.extend(tDense)
+                else:
+                    tvals.extend(tDense[1:])
+
+                for j, col in enumerate(specificCols):
+                    x_interval = np.array(self.resultHistory[meshIteration][col])[
+                        start : end + 1
+                    ]
+
+                    # linear interpolation
+                    if col in self.uVarNames and linearControl:
+                        linInpVals = np.interp(tDense, t_interval, x_interval)
+                        if idx == 0:
+                            vals[j].extend(linInpVals)
+                        else:
+                            vals[j].extend(linInpVals[1:])
+
+                    # piecewise polynomial
+                    else:
+                        polyCoeffs = np.polyfit(t_interval, x_interval, self.rksteps)
+                        polyFunc = np.poly1d(polyCoeffs)
+
+                        interpolated_values = polyFunc(tDense)
+                        if idx == 0:
+                            vals[j].extend(interpolated_values)
+                        else:
+                            vals[j].extend(interpolated_values[1:])
+
+            f.write(f"#1\ndouble K({len(vals[0])}, {1 + len(specificCols)})\n")
+
+            for idx in range(len(tvals)):
+                line = str(tvals[idx]) + " "
+                for j, col in enumerate(specificCols):
+                    line += str(vals[j][idx]) + " "
+                f.write(line[:-1] + "\n")
+
+        print("[GDOPT - INFO] CombiTable export successful.")
+
     def setPlotDefaults(self):
         plt.rcParams.update(
             {
@@ -1224,7 +1436,7 @@ int main(int argc, char** argv) {{
     ):
         self.initVarNames()
         if interval is None:
-            interval = [0, self.tf]
+            interval = [0, self._tf]
         self._parametricPlot(
             varX=varX,
             varY=varY,
@@ -1266,7 +1478,7 @@ int main(int argc, char** argv) {{
         from matplotlib.ticker import MaxNLocator
 
         if interval is None:
-            interval = [0, self.tf]
+            interval = [0, self._tf]
 
         figMesh, axMesh = self._plotMeshRefinement(
             interval=interval, markerSize=markerSize, dots=dotsMesh, epsilon=epsilon
@@ -1359,7 +1571,7 @@ int main(int argc, char** argv) {{
 
         meshIteration = self.checkMeshIteration(meshIteration)
         if interval is None:
-            interval = [0, self.tf]
+            interval = [0, self._tf]
         self.getResults(meshIteration=meshIteration)
 
         columns_to_plot = specifCols or self.resultHistory[meshIteration].columns[1:]
@@ -1395,7 +1607,7 @@ int main(int argc, char** argv) {{
 
         meshIteration = self.checkMeshIteration(meshIteration)
         if interval is None:
-            interval = [0, self.tf]
+            interval = [0, self._tf]
 
         self.getResults(meshIteration=meshIteration)
 
@@ -1434,12 +1646,12 @@ int main(int argc, char** argv) {{
                 [
                     x
                     for i, x in enumerate(self.resultHistory[meshIteration]["time"])
-                    if i % self.rksteps == 0
+                    if i % self._rksteps == 0
                 ],
                 [
                     x
                     for i, x in enumerate(self.resultHistory[meshIteration][column])
-                    if i % self.rksteps == 0
+                    if i % self._rksteps == 0
                 ],
                 color="red",
                 s=30,
@@ -1462,8 +1674,8 @@ int main(int argc, char** argv) {{
             )
         elif dots == Dots.BASE:
             plt.scatter(
-                [x for i, x in enumerate(x_data) if i % self.rksteps == 0],
-                [y for i, y in enumerate(y_data) if i % self.rksteps == 0],
+                [x for i, x in enumerate(x_data) if i % self._rksteps == 0],
+                [y for i, y in enumerate(y_data) if i % self._rksteps == 0],
                 color="red",
                 s=30,
                 edgecolor="black",
@@ -1479,7 +1691,7 @@ int main(int argc, char** argv) {{
         from matplotlib.ticker import MaxNLocator
 
         if interval is None:
-            interval = [0, self.tf]
+            interval = [0, self._tf]
 
         prev_points = np.array([])
 
@@ -1528,16 +1740,16 @@ int main(int argc, char** argv) {{
         return fig, ax
 
     def _getModulo(self, dots):
-        return 1 if dots == Dots.ALL else self.rksteps
+        return 1 if dots == Dots.ALL else self._rksteps
 
     def plotSparseMatrix(self, matrixType):
         from matplotlib.patches import Rectangle
         import scipy.sparse as sp
 
         if matrixType == MatrixType.JACOBIAN:
-            file_path = self.exportJacobianPath + f"/{self.name}_jacobian.csv"
+            file_path = self._exportJacobianPath + f"/{self.name}_jacobian.csv"
         elif matrixType == MatrixType.HESSIAN:
-            file_path = self.exportHessianPath + f"/{self.name}_hessian.csv"
+            file_path = self._exportHessianPath + f"/{self.name}_hessian.csv"
         else:
             raise InvalidMatrix(
                 "Plotting is only possible for matrixTypes JACOBIAN or HESSIAN."

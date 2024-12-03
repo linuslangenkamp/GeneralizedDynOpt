@@ -23,11 +23,11 @@ model.addFinal(1 / r - vtheta**2, eq=0)
 
 model.addMayer(r, Objective.MAXIMIZE)
 
-model.setTolerance(1e-10)
-model.setMeshIterations(5)
-model.setMeshAlgorithm(MeshAlgorithm.L2_BOUNDARY_NORM)
-model.setMuStrategyRefinement(MuStrategy.MONOTONE)
-model.setMuInitRefinement(1e-14)
+model.tolerance = 1e-10
+model.meshIterations = 5
+model.meshAlgorithm = MeshAlgorithm.L2_BOUNDARY_NORM
+model.muStrategyRefinement = MuStrategy.MONOTONE
+model.muInitRefinement = 1e-14
 
 model.solve(tf=3.32, steps=25, rksteps=5)
 model.plot(dots=Dots.ALL)

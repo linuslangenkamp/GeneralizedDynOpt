@@ -44,7 +44,7 @@ model.generate()
 model.optimize(
     tf=1,
     steps=250,
-    rksteps=3,
+    rksteps=2,
     flags={"linearSolver": LinearSolver.MA57, "initVars": InitVars.SOLVE},
     meshFlags={
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,

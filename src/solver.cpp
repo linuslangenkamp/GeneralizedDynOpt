@@ -52,10 +52,10 @@
     -> new branch with 5, 9, 10, 11
 
     others:
-    11 plotting features for path constraints, lagrange terms            1, 1
-    12 splitting const jacobian equality / inequality                    1, 1
-    13 use argc, argv                                                    1, 1
-    14 better memory management, not always vector.push_back             2, 1
+    12 plotting features for path constraints, lagrange terms            1, 1
+    13 splitting const jacobian equality / inequality                    1, 1
+    14 use argc, argv                                                    1, 1
+    15 better memory management, not always vector.push_back             2, 1
 */
 
 struct SolverPrivate {
@@ -154,7 +154,8 @@ std::vector<int> Solver::L2BoundaryNorm() const {
      * calculates the P1 error between adjacent intervals, if too large -> bisect
      */
 
-    // states and control, if S_A_C_D = false or only control, if S_A_C_D = true
+    // states and control, if STATE_AND_CONTROL_DETECTION = true
+    // only control, if STATE_AND_CONTROL_DETECTION = false
     int vOffset = _priv->gdop->offX;
     int vLength = _priv->gdop->offU;
     if (STATE_AND_CONTROL_DETECTION) {
@@ -276,7 +277,7 @@ std::vector<int> Solver::L2BoundaryNorm() const {
                     markerSet.insert(i - 1);
                 }
 
-                break;
+                // break; -> maybe has influence on lastDiffs, cause not properly evaluated
             }
         }
     }

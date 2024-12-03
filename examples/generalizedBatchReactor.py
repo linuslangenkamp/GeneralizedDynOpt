@@ -7,7 +7,7 @@ import random
 
 model = Model("generalizedBatchReactor")
 
-N = 50
+N = 150
 CHAIN_SIZE = 15
 
 x = []
@@ -51,7 +51,7 @@ for v in range(N):
         model.addDynamic(
             x[N - 1],
             sum(u * coeffs[N - 1][k] * x[k] for k in range(N)) + DEPL * x[0] * u**2,
-        )
+            )
 
 model.addDynamic(energy, u**EXP_E)
 
@@ -63,14 +63,14 @@ model.generate()
 
 model.optimize(
     tf=1,
-    steps=1,
-    rksteps=70,
+    steps=19,
+    rksteps=3,
     flags={"linearSolver": LinearSolver.MA57, "exportJacobianPath": "/tmp"},
     meshFlags={
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
         "iterations": 0,
         "refinementMethod": RefinementMethod.LINEAR_SPLINE,
-    },
+        },
 )
 
 model.plot(specifCols=["obj", "u", "energy"], dots=Dots.ALL)
