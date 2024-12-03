@@ -18,6 +18,7 @@ extern int MAX_ITERATIONS;
 extern int MESH_ITERATIONS;
 extern bool USER_SCALING;
 
+extern int FULL_BISECTIONS;
 extern double SIGMA;
 extern double LEVEL;
 extern double C_TOL;

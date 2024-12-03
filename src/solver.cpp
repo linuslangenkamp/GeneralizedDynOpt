@@ -135,6 +135,14 @@ int Solver::solve() {
 }
 
 std::vector<int> Solver::detect() const {
+    // full bisection / detect all
+    if (FULL_BISECTIONS >= meshIteration) {
+        std::vector<int> allIntervals(_priv->gdop->mesh.intervals);
+        std::iota(allIntervals.begin(), allIntervals.end(), 0);
+        return allIntervals;
+    }
+
+    // standard mesh refinement
     switch (MESH_ALGORITHM) {
         case MeshAlgorithm::NONE:
             return {};

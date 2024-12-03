@@ -76,6 +76,7 @@ class Model:
         self._meshCTol = None
         self._meshSigma = None
         self._detectStatesAndControl = None
+        self._fullBisections = None
         self._quadraticObjective = False
         self._linearObjective = False
         self._linearConstraints = False
@@ -616,6 +617,14 @@ class Model:
         self._meshAlgorithm = meshAlgorithm
 
     @property
+    def fullBisections(self) -> int:
+        return self.fullBisections
+
+    @fullBisections.setter
+    def fullBisections(self, fullBisections: int):
+        self._fullBisections = fullBisections
+
+    @property
     def meshIterations(self) -> int:
         return self._meshIterations
 
@@ -745,6 +754,8 @@ class Model:
             self.muInitRefinement = meshFlags["muInitRefinement"]
         if "detectStatesAndControl" in meshFlags:
             self.detectStatesAndControl = meshFlags["detectStatesAndControl"]
+        if "fullBisections" in meshFlags:
+            self.fullBisections = meshFlags["fullBisections"]
 
     def uInitialGuessCodegen(self):
         out = "std::vector<double> initialGuessU(double t) {\n"
@@ -1195,6 +1206,8 @@ int main(int argc, char** argv) {{
             OUTPUT += f"C_TOL {self._meshCTol}\n"
         if self._detectStatesAndControl is not None:
             OUTPUT += f"STATE_AND_CONTROL_DETECTION {'true' if self._detectStatesAndControl else 'false'}\n"
+        if self._fullBisections is not None:
+            OUTPUT += f"FULL_BISECTIONS {self._fullBisections}\n"
 
         OUTPUT += "\n[runtime parameters]\n"
         for rp in self.rpVars:

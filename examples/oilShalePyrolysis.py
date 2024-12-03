@@ -27,19 +27,20 @@ model.generate()
 
 model.optimize(
     tf=8,
-    steps=50,
+    steps=25,
     rksteps=3,
     flags={"tolerance": 1e-15, "linearSolver": LinearSolver.MA57},
     meshFlags={
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
-        "iterations": 7,
+        "iterations": 6,
         "muStrategyRefinement": MuStrategy.MONOTONE,
         "muInitRefinement": 1e-16,
+        "fullBisections": 4,
     },
 )
 
 model.exportToCombiTable(
-    ["temperature", "pyrolytic bitumen"], meshIteration=1, polySteps=50
+    ["temperature", "pyrolytic bitumen"], meshIteration=5, polySteps=50
 )
 model.plot(specifCols=["pyrolytic bitumen", "temperature"])
 model.plotInputsAndRefinement(dotsGraph=Dots.BASE)

@@ -32,6 +32,7 @@ std::string MU_STRATEGY = "adaptive";             // mu strategy - only first me
 std::string MU_STRATEGY_REFINEMENT = "adaptive";  // mu strategy - all mesh iterations
 
 // mesh parameters
+int FULL_BISECTIONS = 0;                   // value determines in  how many refinement iterations all intervals are bisected
 double SIGMA = 2.5;                        // basicStrategy: std deviation sigma
 double LEVEL = 0;                          // L2BN: L2 criterion factor, log scale, std range -2.5 - 2.5
 double C_TOL = 0.1;                        // L2BN: corner criterion P1-error threshold, std range 0.05 - 0.5
@@ -208,5 +209,8 @@ void setGlobalStandardConfiguration(const std::unordered_map<std::string, std::s
     }
     if ((configMap.find("STATE_AND_CONTROL_DETECTION") != configMap.end())) {
         STATE_AND_CONTROL_DETECTION = configMap.at("STATE_AND_CONTROL_DETECTION") == "true";
+    }
+    if ((configMap.find("FULL_BISECTIONS") != configMap.end())) {
+        FULL_BISECTIONS = std::stoi(configMap.at("FULL_BISECTIONS"));
     }
 }
