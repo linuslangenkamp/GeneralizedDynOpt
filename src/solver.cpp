@@ -56,6 +56,7 @@
     13 splitting const jacobian equality / inequality                    1, 1
     14 use argc, argv                                                    1, 1
     15 better memory management, not always vector.push_back             2, 1
+    16 remove D2, E2 or generally both eval matrices, for less .so size  3, 1
 */
 
 struct SolverPrivate {
@@ -239,7 +240,7 @@ std::vector<int> Solver::L2BoundaryNorm() const {
             // values of the (1st, 2nd) diff of the interpolating polynomial at 0, c1, c2, ...
             std::vector<double> p_vDiff = _priv->gdop->rk.evalLagrangeDiff(vCoeffs);
             // TODO: maybe remove 2nd diff matrix evalLagrangeDiff2(vCoeffs) <=> evalLagrangeDiff(p_UDiff), since D^{1}^2 = D^2
-            std::vector<double> p_vDiff2 = _priv->gdop->rk.evalLagrangeDiff2(vCoeffs);
+            std::vector<double> p_vDiff2 = _priv->gdop->rk.evalLagrangeDiff(p_vDiff);
             // squared values of the (1st, 2nd) diff of the interpolating polynomial at c1, c2, ...
             std::vector<double> sq_p_vDiff;
             std::vector<double> sq_p_vDiff2;
@@ -424,6 +425,8 @@ void Solver::refinePolynomial(std::vector<int>& markedIntervals) {
     int newOffXUTotal = (_priv->gdop->problem->sizeX + _priv->gdop->problem->sizeU) * _priv->gdop->rk.steps * _priv->gdop->mesh.intervals;
     int newNumberVars = newOffXUTotal + _priv->gdop->problem->sizeP;
     cbValues.resize(newNumberVars, 0.0);
+
+    // TODO: refactor with only EvalMatrix0
 
     // interpolate all values on marked intervals
     int index = 0;

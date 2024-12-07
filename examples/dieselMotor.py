@@ -79,10 +79,8 @@ w_tc = model.addState(
     symbol="w_tc",
 )
 
-u_f = model.addInput(
-    lb=0, ub=250 / control_norm1, symbol="u_f", guess=25 / control_norm1
-)
-u_wg = model.addInput(lb=0, ub=1, symbol="u_wg", guess=0.1)
+u_f = model.addInput(lb=0, ub=250 / control_norm1, symbol="u_f", guess=0.5)
+u_wg = model.addInput(lb=0, ub=1, symbol="u_wg", guess=0.5)
 
 W_ICE = state_norm1 * w_ice
 P_IM = state_norm2 * p_im
@@ -177,12 +175,11 @@ model.addLagrange(dot_m_f)
 model.generate()
 
 model.optimize(
-    steps=75,
-    rksteps=5,
+    steps=25,
+    rksteps=3,
     tf=0.5,
     flags={
         "linearSolver": LinearSolver.MUMPS,
-        "ivpSolver": IVPSolver.RADAU,
         "initVars": InitVars.SOLVE,
         "tolerance": 1e-14,
     },
@@ -192,9 +189,10 @@ model.optimize(
         "refinementMethod": RefinementMethod.LINEAR_SPLINE,
         "muStrategyRefinement": MuStrategy.MONOTONE,
         "muInitRefinement": 1e-14,
+        "fullBisections": 0,
     },
 )
 
 model.plot(dots=Dots.ALL)
 model.plotMeshRefinement()
-model.plotInputsAndRefinement()
+model.plotInputsAndRefinement(dotsGraph=Dots.ALL)

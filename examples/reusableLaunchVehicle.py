@@ -87,7 +87,7 @@ model.addFinal(fpa, eq=fpaf)
 model.addMayer(-lat)
 
 model.tolerance = 1e-14
-model.meshIterations = 8
+model.meshIterations = 10
 model.meshAlgorithm = MeshAlgorithm.L2_BOUNDARY_NORM
 model.muStrategyRefinement = MuStrategy.MONOTONE
 model.muInitRefinement = 1e-14
@@ -96,8 +96,14 @@ model.generate()
 
 model.optimize(
     tf=2009.35,
-    steps=10,
-    rksteps=4,
+    steps=25,
+    rksteps=3,
 )
-model.plot(dots=Dots.BASE)
+
+
+model.exportToCombiTable(
+    ["angleOfAttack", "bankAngle", "speed", "height", "flightpath"], meshIteration=7, polySteps=25
+)
+
+model.plot(dots=Dots.ALL, specifCols=["height", "speed",  "flightpath", "angleOfAttack", "bankAngle"])
 model.plotInputsAndRefinement()

@@ -28,9 +28,9 @@ model.generate()
 model.optimize(
     tf=10000,
     steps=25,
-    rksteps=5,
+    rksteps=7,
     flags={
-        "linearSolver": LinearSolver.MA57,
+        "linearSolver": LinearSolver.MUMPS,
         "quadraticObjective": True,
         "linearConstraints": True,
     },
@@ -43,5 +43,5 @@ model.optimize(
     },
 )
 
-model.plot(interval=[9980, 10000], dots=Dots.ALL)
-model.plotMeshRefinement(interval=[9980, 10000])
+model.plot(interval=[9980, 10000], dots=Dots.BASE)
+model.plotVarsAndRefinement(interval=[9980, 10000], dotsGraph=Dots.BASE)

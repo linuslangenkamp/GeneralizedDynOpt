@@ -7,7 +7,9 @@ x2 = model.addState(start=0, symbol="pyrolytic bitumen")
 x3 = model.addState(start=0, symbol="oil & gas")
 x4 = model.addState(start=0, symbol="organic carbon")
 
-T = model.addInput(lb=698.15, ub=748.15, symbol="temperature", nominal=700)
+T = model.addInput(
+    lb=698.15, ub=748.15, symbol="temperature", nominal=700, guess=(748.15 + 698.15) / 2
+)
 
 k1 = exp(8.86 - (20300 / 1.9872) / T)
 k2 = exp(24.25 - (37400 / 1.9872) / T)
@@ -27,20 +29,21 @@ model.generate()
 
 model.optimize(
     tf=8,
-    steps=25,
+    steps=100,
     rksteps=3,
     flags={"tolerance": 1e-15, "linearSolver": LinearSolver.MA57},
     meshFlags={
         "algorithm": MeshAlgorithm.L2_BOUNDARY_NORM,
         "iterations": 6,
         "muStrategyRefinement": MuStrategy.MONOTONE,
-        "muInitRefinement": 1e-16,
-        "fullBisections": 4,
+        "muInitRefinement": 1e-14,
+        "fullBisections": 2,
     },
 )
 
 model.exportToCombiTable(
-    ["temperature", "pyrolytic bitumen"], meshIteration=5, polySteps=50
+    ["temperature", "pyrolytic bitumen"], meshIteration=0, polySteps=75
 )
+
 model.plot(specifCols=["pyrolytic bitumen", "temperature"])
 model.plotInputsAndRefinement(dotsGraph=Dots.BASE)

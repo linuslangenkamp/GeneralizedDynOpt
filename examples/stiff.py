@@ -9,7 +9,7 @@ u = model.addInput(lb=0, ub=1)
 
 maxStiffness = model.addRuntimeParameter(default=0, symbol="maxStiffness")
 
-stiffness = model.addParameter(lb=-250, ub=maxStiffness)
+stiffness = model.addParameter(ub=maxStiffness, guess=-10)
 
 model.addDynamic(x, stiffness * (x + y * cos(t)) + u)
 model.addDynamic(y, x * exp(u) / (u**2 + 1))
@@ -20,7 +20,7 @@ model.generate()
 
 model.optimize(
     tf=0.25,
-    steps=100,
+    steps=25,
     rksteps=5,
     flags={"linearSolver": LinearSolver.MUMPS, "initVars": InitVars.SOLVE},
     meshFlags={

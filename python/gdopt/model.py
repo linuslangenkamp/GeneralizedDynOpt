@@ -1491,8 +1491,9 @@ int main(int argc, char** argv) {{
         from matplotlib.ticker import MaxNLocator
 
         if interval is None:
-            interval = [0, self._tf]
+            interval = [0, self.tf]
 
+        # Generate mesh refinement and general plots
         figMesh, axMesh = self._plotMeshRefinement(
             interval=interval, markerSize=markerSize, dots=dotsMesh, epsilon=epsilon
         )
@@ -1503,21 +1504,25 @@ int main(int argc, char** argv) {{
             dots=dotsGraph,
         )
 
+        # Close the generated figures to avoid duplicate display
         plt.close(figGraph)
         plt.close(figMesh)
 
-        fig, axs = plt.subplots(len(axsGraph) + 1, 1, figsize=(12, 10))
+        # Create new subplots with an extra axis for mesh refinement
+        fig, axs = plt.subplots(len(axsGraph) + 1, 1, figsize=(12, 10), sharex=True)
 
-        for i in range(1, len(axs)):
-            axs[i].sharex(axs[0])
-
+        # Plot data for intermediate axes
         for i in range(len(axsGraph)):
-            axs[i].set_xticks([])
             axs[i].plot(
                 axsGraph[i].lines[0].get_xdata(), axsGraph[i].lines[0].get_ydata()
             )
             axs[i].set_ylabel(axsGraph[i].get_ylabel())
             axs[i].set_xlim(interval)
+
+            # Hide x-ticks and labels for intermediate axes
+            axs[i].tick_params(axis="x", which="both", bottom=False, labelbottom=False)
+
+            # Add scatter points if collections are present
             if axsGraph[i].collections:
                 for coll in axsGraph[i].collections:
                     offsets = coll.get_offsets()
@@ -1531,10 +1536,11 @@ int main(int argc, char** argv) {{
                         zorder=5,
                     )
 
+        # Plot mesh refinement data on the last axis
         if axMesh.collections:
             for coll in axMesh.collections:
                 offsets = coll.get_offsets()
-                axs[len(axs) - 1].scatter(
+                axs[-1].scatter(
                     offsets[:, 0],
                     offsets[:, 1],
                     color="red",
@@ -1542,10 +1548,14 @@ int main(int argc, char** argv) {{
                     edgecolor="black",
                     alpha=0.8,
                 )
-            axs[len(axs) - 1].set_ylabel(axMesh.get_ylabel())
-            axs[len(axs) - 1].set_xlim(interval)
-            axs[len(axs) - 1].yaxis.set_major_locator(MaxNLocator(integer=True))
+            axs[-1].set_ylabel(axMesh.get_ylabel())
+            axs[-1].set_xlim(interval)
+            axs[-1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
+        # Allow Matplotlib's default x-ticks on the last axis
+        axs[-1].set_xlabel("Time")
+
+        # Adjust layout for better spacing
         plt.tight_layout()
         plt.subplots_adjust(left=0.075, right=0.95, top=0.925, bottom=0.075, hspace=0.1)
         plt.show()
