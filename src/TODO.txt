@@ -1,0 +1,43 @@
+
+/* BIG TODOS: TYPE | IMPORTANCE | EFFORT from 1 to 5
+ * TODO:
+
+    - hp adaptive
+    - tf free
+    - initial constraints, initial Mayer
+    - own scaling routines + maybe hash(func) -> (scaling values), Scaler Class
+    - typedef GNumber
+    - constate estimations
+    - integration matrix // differentiation matrix
+    - OpenModelica interface
+    - use barycentric lagrange interpolation
+    --> build new pseudospectral approach based on GDOP + M0 + r0 + tf (possibly) free
+
+    main todos:
+    1 add, construct, test more mesh refinement algorithms!              5, 4
+    2 OpenModelica interface                                             5, 5
+    3 test framework for huge examples / industry relevant               3, 2
+    4 check long double to double cast in evals, refactor to typedef     2, 2
+      e.g. GNumber, which is long (double) -> cast to double for ipopt
+
+    delayed:
+    5 tf as free variable                                                2, 4.5
+    6 vectorized equation, derivatives with local substitutions          2, 4
+    -> define vec(f,g), vec(r), vec(a(p)) : faster compilation, since
+       less classes are generated or does it not matter?
+    7 better initial guess: evolutionary algorithms, high deg poly       2, 3
+    -> use a bdf method and interpolate the discrete state values
+    8 detection for nominal, linear, quadratic, const hessian            1, 2
+    9 constructing a p / hp-method?                                      5, 5
+    10 add initial constraints -> x0 is variable aswell                  4, 3
+    11 add proper scaling implemented by hand                            5, 4
+
+    -> new branch with 5, 9, 10, 11
+
+    others:
+    12 plotting features for path constraints, lagrange terms            1, 1
+    13 splitting const jacobian equality / inequality                    1, 1
+    14 use argc, argv                                                    1, 1
+    15 better memory management, not always vector.push_back             2, 1
+    16 remove D2, E2 or generally both eval matrices, for less .so size  3, 1
+*/

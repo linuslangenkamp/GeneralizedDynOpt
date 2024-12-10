@@ -34,6 +34,8 @@ import importlib.resources as resources
 pd.set_option("display.precision", 8)
 
 
+# TODO: add vectorized variable adds and matrix vector / vector vector operations on them
+
 class Model:
     def __init__(self, name="DummyName"):
         self.creationTime = timer.process_time()
