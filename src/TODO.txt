@@ -13,6 +13,9 @@
     - use barycentric lagrange interpolation
     --> build new pseudospectral approach based on GDOP + M0 + r0 + tf (possibly) free
 
+    - add matrix class / vector operations in frontend
+    - add better plotting features
+
     main todos:
     1 add, construct, test more mesh refinement algorithms!              5, 4
     2 OpenModelica interface                                             5, 5

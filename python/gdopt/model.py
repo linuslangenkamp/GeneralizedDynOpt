@@ -23,6 +23,7 @@ from .expressions import *
 from .functions import *
 from .structures import *
 from .radauHandling import *
+from .matrix import *
 from scipy.integrate import solve_ivp
 import time as timer
 import pandas as pd
@@ -35,6 +36,7 @@ pd.set_option("display.precision", 8)
 
 
 # TODO: add vectorized variable adds and matrix vector / vector vector operations on them
+
 
 class Model:
     def __init__(self, name="DummyName"):
@@ -111,6 +113,38 @@ class Model:
 
         return self.addState(start, symbol=symbol, lb=lb, ub=ub, nominal=nominal)
 
+    def addStates(
+        self, size, start, symbol=None, lb=-float("inf"), ub=float("inf"), nominal=None
+    ):
+        newStates = []
+
+        lb = [lb] * size if not isinstance(lb, (list, Vector)) else lb
+        ub = [ub] * size if not isinstance(ub, (list, Vector)) else ub
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+
+        for i in range(size):
+            newStates.append(
+                self.addState(
+                    start=start[i] if isinstance(start, (list, Vector)) else start,
+                    symbol=(
+                        symbol[i]
+                        if symbol and isinstance(symbol, (list, Vector))
+                        else None
+                    ),
+                    lb=lb[i],
+                    ub=ub[i],
+                    nominal=nominal[i] if nominal else None,
+                )
+            )
+        return Vector(newStates)
+
+    def addXs(
+        self, size, start, symbol=None, lb=-float("inf"), ub=float("inf"), nominal=None
+    ):
+        return self.addStates(size, start, symbol=symbol, lb=lb, ub=ub, nominal=nominal)
+
     def addInput(
         self, symbol=None, lb=-float("inf"), ub=float("inf"), guess=0, nominal=None
     ):
@@ -148,6 +182,68 @@ class Model:
 
         return self.addInput(symbol=symbol, lb=lb, ub=ub, guess=guess, nominal=nominal)
 
+    def addInputs(
+        self,
+        size,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        guess=0,
+        nominal=None,
+    ):
+        newInputs = []
+
+        # Handle scalar inputs for lb, ub, guess, and nominal by converting them to lists
+
+        lb = [lb] * size if not isinstance(lb, (list, Vector)) else lb
+        ub = [ub] * size if not isinstance(ub, (list, Vector)) else ub
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+        guess = [guess] * size if not isinstance(guess, (list, Vector)) else guess
+
+        for i in range(size):
+            newInputs.append(
+                self.addInput(
+                    symbol=(
+                        symbol[i]
+                        if symbol and isinstance(symbol, (list, Vector))
+                        else None
+                    ),
+                    lb=lb[i],
+                    ub=ub[i],
+                    guess=guess[i] if guess else 0,
+                    nominal=nominal[i] if nominal else None,
+                )
+            )
+        return Vector(newInputs)
+
+    def addUs(
+        self,
+        size,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        guess=0,
+        nominal=None,
+    ):
+        return self.addInputs(
+            size, symbol=symbol, lb=lb, ub=ub, guess=guess, nominal=nominal
+        )
+
+    def addControls(
+        self,
+        size,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        guess=0,
+        nominal=None,
+    ):
+        return self.addInputs(
+            size, symbol=symbol, lb=lb, ub=ub, guess=guess, nominal=nominal
+        )
+
     def addParameter(
         self, symbol=None, lb=-float("inf"), ub=float("inf"), guess=0, nominal=None
     ):
@@ -170,6 +266,54 @@ class Model:
 
         return self.addParameter(
             symbol=symbol, lb=lb, ub=ub, guess=guess, nominal=nominal
+        )
+
+    def addParameters(
+        self,
+        size,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        guess=0,
+        nominal=None,
+    ):
+        newParameters = []
+
+        # Handle scalar inputs for lb, ub, guess, and nominal by converting them to lists
+        lb = [lb] * size if not isinstance(lb, (list, Vector)) else lb
+        ub = [ub] * size if not isinstance(ub, (list, Vector)) else ub
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+        guess = [guess] * size if not isinstance(guess, (list, Vector)) else guess
+
+        for i in range(size):
+            newParameters.append(
+                self.addParameter(
+                    symbol=(
+                        symbol[i]
+                        if symbol and isinstance(symbol, (list, Vector))
+                        else None
+                    ),
+                    lb=lb[i],
+                    ub=ub[i],
+                    guess=guess[i] if guess else 0,
+                    nominal=nominal[i] if nominal else None,
+                )
+            )
+        return Vector(newParameters)
+
+    def addPs(
+        self,
+        size,
+        symbol=None,
+        lb=-float("inf"),
+        ub=float("inf"),
+        guess=0,
+        nominal=None,
+    ):
+        return self.addParameters(
+            size, symbol=symbol, lb=lb, ub=ub, guess=guess, nominal=nominal
         )
 
     def addBinaryParameter(self, lb=0, ub=1, symbol=None, guess=None, nominal=None):
@@ -267,6 +411,8 @@ class Model:
 
     def addDynamic(self, diffVar, expr, nominal=None):
         # adds a dynamic constraint: diffVar' = expr
+        if isinstance(expr, (list, Vector)):
+            raise ValueError("Expression must be scalar")
 
         for f in self.F:
             if diffVar == f.diffVar:
@@ -285,9 +431,31 @@ class Model:
 
         self.addDynamic(diffVar, expr, nominal=nominal)
 
+    def addDynamics(self, diffVar, expr, nominal=None):
+        if not isinstance(diffVar, (list, Vector)) and not isinstance(
+            expr, (list, Vector)
+        ):
+            raise ValueError(
+                "addDynamics expect lists or Vectors for diffVar and expr."
+            )
+
+        size = len(diffVar)
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+        for i in range(size):
+            self.addDynamic(diffVar[i], expr[i], nominal=nominal[i])
+
+    def addOdes(self, diffVar, expr, nominal=None):
+        self.addDynamics(diffVar, expr, nominal=nominal)
+
+    def addFs(self, diffVar, expr, nominal=None):
+        self.addDynamics(diffVar, expr, nominal=nominal)
+
     def addPath(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
         # adds a path constraint: lb <= g(.(t)) <= ub or g(.(t)) == eq
-
+        if isinstance(expr, (list, Vector)):
+            raise ValueError("Expression must be scalar")
         self.checkBounds(lb, ub, eq)
         self.G.append(Constraint(expr, lb=lb, ub=ub, eq=eq, nominal=nominal))
         self.checkNominalNone(nominal)
@@ -297,9 +465,27 @@ class Model:
 
         self.addPath(expr, lb=lb, ub=ub, eq=eq, nominal=nominal)
 
+    def addPaths(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
+        if not isinstance(expr, (list, Vector)):
+            raise ValueError("addPaths expect lists or Vectors for expr.")
+
+        size = len(expr)
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+        lb = [lb] * size if not isinstance(lb, (list, Vector)) else lb
+        ub = [ub] * size if not isinstance(ub, (list, Vector)) else ub
+        eq = [eq] * size if not isinstance(eq, (list, Vector)) else eq
+        for i in range(size):
+            self.addPath(expr[i], lb=lb[i], ub=ub[i], eq=eq[i], nominal=nominal[i])
+
+    def addGs(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
+        return self.addPaths(expr, lb=lb, ub=ub, eq=eq, nominal=nominal)
+
     def addFinal(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
         # adds a final constraint: lb <= r(.(tf)) <= ub or r(.(tf)) == eq
-
+        if isinstance(expr, (list, Vector)):
+            raise ValueError("Expression must be scalar")
         self.checkBounds(lb, ub, eq)
         self.R.append(Constraint(expr, lb=lb, ub=ub, eq=eq, nominal=nominal))
         self.checkNominalNone(nominal)
@@ -309,11 +495,29 @@ class Model:
 
         self.addFinal(expr, lb=lb, ub=ub, eq=eq, nominal=nominal)
 
+    def addFinals(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
+        if not isinstance(expr, (list, Vector)):
+            raise ValueError("addFinals expect lists or Vectors for expr.")
+
+        size = len(expr)
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+        lb = [lb] * size if not isinstance(lb, (list, Vector)) else lb
+        ub = [ub] * size if not isinstance(ub, (list, Vector)) else ub
+        eq = [eq] * size if not isinstance(eq, (list, Vector)) else eq
+        for i in range(size):
+            self.addFinal(expr[i], lb=lb[i], ub=ub[i], eq=eq[i], nominal=nominal[i])
+
+    def addRs(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
+        return self.addFinals(expr, lb=lb, ub=ub, eq=eq, nominal=nominal)
+
     def addParametric(
         self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None
     ):
         # adds a parametric constraint: lb <= a(p) <= ub or a(p) == eq
-
+        if isinstance(expr, (list, Vector)):
+            raise ValueError("Expression must be scalar")
         if not set(self.pVars).issuperset(expr.free_symbols):
             raise InvalidModel(
                 "[GDOPT - ERROR] Parametric constraints only allow parametric variables"
@@ -327,6 +531,27 @@ class Model:
         # alias for addParametric()
 
         self.addParametric(expr, lb=lb, ub=ub, eq=eq, nominal=nominal)
+
+    def addParametrics(
+        self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None
+    ):
+        if not isinstance(expr, (list, Vector)):
+            raise ValueError("addParametrics expect lists or Vectors for expr.")
+
+        size = len(expr)
+        nominal = (
+            [nominal] * size if not isinstance(nominal, (list, Vector)) else nominal
+        )
+        lb = [lb] * size if not isinstance(lb, (list, Vector)) else lb
+        ub = [ub] * size if not isinstance(ub, (list, Vector)) else ub
+        eq = [eq] * size if not isinstance(eq, (list, Vector)) else eq
+        for i in range(size):
+            self.addParametric(
+                expr[i], lb=lb[i], ub=ub[i], eq=eq[i], nominal=nominal[i]
+            )
+
+    def addAs(self, expr, lb=-float("inf"), ub=float("inf"), eq=None, nominal=None):
+        return self.addParametrics(expr, lb=lb, ub=ub, eq=eq, nominal=nominal)
 
     def checkBounds(self, lb, ub, eq):
         if eq is not None and (lb != -float("inf") or ub != float("inf")):
