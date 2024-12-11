@@ -26,7 +26,7 @@ model.addLagrange(0.5 * (x**2 + u**2))
 model.generate()
 
 model.optimize(
-    tf=10000000,
+    tf=10000,
     steps=50,
     rksteps=7,
     flags={
