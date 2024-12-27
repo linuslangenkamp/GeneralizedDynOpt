@@ -161,7 +161,6 @@ class Matrix:
 
     @property
     def transpose(self):
-        # Transpose the matrix
         return Matrix(
             [[self.data[j][i] for j in range(self.rows)] for i in range(self.cols)]
         )

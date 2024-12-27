@@ -96,14 +96,19 @@ model.generate()
 
 model.optimize(
     tf=2009.35,
-    steps=25,
-    rksteps=3,
+    steps=5,
+    rksteps=4,
 )
 
 
 model.exportToCombiTable(
-    ["angleOfAttack", "bankAngle", "speed", "height", "flightpath"], meshIteration=7, polySteps=25
+    ["angleOfAttack", "bankAngle", "speed", "height", "flightpath"],
+    meshIteration=7,
+    polySteps=25,
 )
 
-model.plot(dots=Dots.ALL, specifCols=["height", "speed",  "flightpath", "angleOfAttack", "bankAngle"])
+model.plot(
+    dots=Dots.ALL,
+    specifCols=["height", "speed", "flightpath", "angleOfAttack", "bankAngle"],
+)
 model.plotInputsAndRefinement()

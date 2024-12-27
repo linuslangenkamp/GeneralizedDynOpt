@@ -27,7 +27,7 @@ model.generate()
 
 model.optimize(
     tf=10000,
-    steps=50,
+    steps=25,
     rksteps=7,
     flags={
         "linearSolver": LinearSolver.MUMPS,

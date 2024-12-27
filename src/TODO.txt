@@ -5,7 +5,8 @@
     - hp adaptive
     - tf free
     - initial constraints, initial Mayer
-    - own scaling routines + maybe hash(func) -> (scaling values), Scaler Class
+    - phases
+    - own scaling routines
     - typedef GNumber
     - constate estimations
     - integration matrix // differentiation matrix
@@ -13,7 +14,6 @@
     - use barycentric lagrange interpolation
     --> build new pseudospectral approach based on GDOP + M0 + r0 + tf (possibly) free
 
-    - add matrix class / vector operations in frontend
     - add better plotting features
 
     main todos:

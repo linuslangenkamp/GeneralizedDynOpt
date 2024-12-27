@@ -1,0 +1,3 @@
+/home/linus/Projects/GDOPT/spectral/build/CMakeFiles/gdopt_experimental.dir
+/home/linus/Projects/GDOPT/spectral/build/CMakeFiles/edit_cache.dir
+/home/linus/Projects/GDOPT/spectral/build/CMakeFiles/rebuild_cache.dir

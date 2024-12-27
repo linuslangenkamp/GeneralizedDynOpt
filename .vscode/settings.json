@@ -64,8 +64,9 @@
     "typeinfo": "cpp",
     "complex": "cpp",
     "unordered_set": "cpp",
-    "optional": "cpp"
-  },
+    "optional": "cpp",
+    "*.data": "cpp"
+},
   "editor.tabSize": 4,
   "clang-format.executable": "/usr/bin/clang-format",
   "clang-format.style": "file",
@@ -76,13 +77,13 @@
     "Ninja",
     "Unix Makefiles"
   ],
-  "editor.fontFamily": "Hack, Source Code Pro, Consolas, monospace",
+  "editor.fontFamily": "Cascadia Mono, Hack, Courier New, monospace,Consolas",
   "terminal.integrated.fontFamily": "",
-    "editor.cursorStyle": "block",
+    "editor.cursorStyle": "line",
 "C_Cpp.default.cppStandard": "c++17",
 "notebook.output.scrolling": true,
 "workbench.iconTheme": "vs-seti-iosevkanerdfontmono",
-"workbench.colorTheme": "Atom Material Theme",
+"workbench.colorTheme": "One Monokai",
 "cmake.showOptionsMovedNotification": false,
 "remote.autoForwardPortsSource": "hybrid",
 "cmake.pinnedCommands": [
@@ -93,7 +94,7 @@
 
 "C_Cpp.clang_format_path": "/usr/bin/clang-format", // Path to clang-format in WSL
 "C_Cpp.formatting": "clangFormat",                 // Use clang-format for C/C++
-"editor.formatOnSave": true,                       // Enable formatting on save
+"editor.formatOnSave": false,                       // Enable formatting on save
 "editor.defaultFormatter": "xaver.clang-format",   // Default C++ formatter
 "C_Cpp.clang_format_fallbackStyle": "file",  // Use .clang-format file if present
 "editor.tokenColorCustomizations": {
@@ -104,4 +105,5 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
+    "editor.fontSize": 14,
 }
